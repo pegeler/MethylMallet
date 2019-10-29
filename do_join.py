@@ -25,7 +25,7 @@ work = open('working/out.csv', 'r')
 
 # Header ---
 header = work.readline().strip()
-header += ',' + re.search(r'^(.*?)_', sys.argv[1])[1] + '\n'
+header += ',' + re.search(r'^sorted_(.*?)_', sys.argv[1])[1] + '\n'
 temp.write(header)
 
 del header
