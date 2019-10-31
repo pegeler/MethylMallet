@@ -1,4 +1,4 @@
-ddir <- "dat/"
+ddir <- "../dat/"
 
 files <- list.files(ddir, full.names = TRUE)
 GSM_names <- strcapture("(GSM.*?)_", files, proto = list(character(1)))[,1]
