@@ -20,22 +20,22 @@ echo "${0}: Making the key file..." >&2
 # Put down the header
 echo "chrom,pos,strand,mc_class" > working/out.csv
 
-# Start by finding the keys and writing to csv
+# Find the keys and write to csv
 sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -u -m -S 2G working/sorted_*.tsv | \
   cut -f 1,2,3,4 | \
   tr '\t' , \
   >> working/out.csv
 
 # APPEND ------------------------------------------------------------------------------
-echo "${0}: Transposing..." >&2
+echo "${0}: Appending columns..." >&2
 
 # Append columns one-by-one using python3 script
 for f in working/sorted_*.tsv; do
   echo "${0}:   Working on $(basename $f .tsv)" >&2
-  cut -f 1,2,3,4,7 $f | python3 do_join.py "$(basename $f .tsv)"
+  cut -f 1,2,3,4,7 $f | python3 src/do_join.py "$(basename $f .tsv)"
 done
 
 # DONE -------------------------------------------------------------------------------
 rm working/sorted_*.tsv
-echo "${0}: Success! All files transposed." >&2
+echo "${0}: Success! All files joined." >&2
 echo "${0}: Combined comma-separated file saved in 'working/out.csv'" >&2
