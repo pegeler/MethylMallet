@@ -4,6 +4,7 @@
 dat/
 working/
 experiments/
+test/out/
 
 ##################################################
 # Begin python

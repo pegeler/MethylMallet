@@ -6,12 +6,29 @@ set -e
 
 # Usage -----------------------------------------------------------------------
 function usage {
-  echo "Usage: $progname [-d dir] [-S buffer_size] [-o out_file] [-p] FILE [FILE ...]" >&2
+  cat << EOF >&2
+usage: $progname [-h] [-p] [-d DIR] [-S BUFFER_SIZE] [-o OUT_FILE]
+                    FILE [FILE ...]
+
+Do a full outer join of tab-separated methylation files.
+
+positional arguments:
+  FILE            file(s) to be joined
+
+required arguments:
+  -d DIR          working directory
+  -o OUT_FILE     file name to be output to
+
+optional arguments:
+  -h, --help      show this help message and exit
+  -p              do sorting operations using GNU parallel
+  -S BUFFER_SIZE  buffer size allocated to sorting operation
+EOF
   exit 1
 }
 
 # Options ---------------------------------------------------------------------
-while getopts ":d:S:o:p" opt; do
+while getopts ":d:S:o:ph" opt; do
   case $opt in
     d)
       work_dir=$OPTARG
@@ -24,6 +41,9 @@ while getopts ":d:S:o:p" opt; do
       ;;
     p)
       do_par=1
+      ;;
+    h)
+      usage
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -42,6 +62,11 @@ if [[ -z "$buffer_size" ]]; then
   buffer_size=1024b
 fi
 
+if [[ -z "$work_dir" || -z "$out_file" ]]; then
+  echo "ERROR: Missing option(s)"
+  usage
+fi
+
 mkdir -p "$work_dir"
 
 # SORT ------------------------------------------------------------------------
@@ -56,7 +81,7 @@ if [[ -n "$do_par" && -x "$(command -v parallel)" ]]; then
 else
   echo "$progname: Sorting files one-by-one" >&2
   for f in "$@"; do
-    echo "$progname:   Working on $(basename $f .tsv)" >&2
+    echo "$progname:   Working on $(basename $f)" >&2
     tail -q -n +2 "$f" | \
       sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -S $buffer_size -o "${work_dir}/sorted_$(basename $f)"
   done
@@ -69,7 +94,7 @@ echo "$progname: Making the key file..." >&2
 echo "chrom,pos,strand,mc_class" > ${work_dir}/out.csv
 
 # Find the keys and write to csv
-sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -u -m -S $buffer_size ${work_dir}/sorted_*.tsv | \
+sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -u -m -S $buffer_size ${work_dir}/sorted_* | \
   cut -f 1,2,3,4 | \
   tr '\t' , \
   >> ${work_dir}/out.csv
@@ -78,13 +103,13 @@ sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -u -m -S $buffer_size ${work_dir}/sorted_*.ts
 echo "$progname: Appending columns..." >&2
 
 # Append columns one-by-one using python3 script
-for f in ${work_dir}/sorted_*.tsv; do
-  echo "$progname:   Working on $(basename $f .tsv)" >&2
+for f in ${work_dir}/sorted_*; do
+  echo "$progname:   Working on $(basename $f)" >&2
   python3 src/do_join.py "$f"
 done
 
 # DONE ------------------------------------------------------------------------
-rm ${work_dir}/sorted_*.tsv
+rm ${work_dir}/sorted_*
 
 mv "${work_dir}/out.csv" "$out_file"
 

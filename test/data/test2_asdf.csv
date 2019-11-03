@@ -1,0 +1,4 @@
+chrom	pos	strand	mc_class	blah	blah2	methylated
+1	1	+	AAA	x	x	0
+1	2	+	AAA	x	x	0
+1	4	-	BBB	x	x	0

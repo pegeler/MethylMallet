@@ -32,7 +32,7 @@ infile = open(input_file, 'r')
 
 # Header
 header = work.readline().strip() + ','
-header += re.search(r'^sorted_(.*?)_', file_name)[1] + '\n'
+header += re.search(r'^sorted_(.*?)_', file_name).group(1) + '\n'
 temp.write(header)
 
 # Preload first line from stdin
@@ -40,7 +40,8 @@ candidate = infile.readline().strip().split()
 
 # Loop over working file
 for line in work:
-    temp.write(line.strip() + ',')
+    line = line.strip()
+    temp.write(line + ',')
     if line.split(',', 4)[:4] == candidate[:4]:
         temp.write(candidate[-1])
         candidate = infile.readline().strip().split()
