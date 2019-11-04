@@ -1,6 +1,6 @@
 # Creating reference data -------------------------------------------------
 
-ddir <- "test/data/"
+ddir <- "data/"
 
 files <- list.files(ddir, full.names = TRUE)
 file_names <- strcapture("(test[0-9])_", files, proto = list(character(1)))[,1]
@@ -20,15 +20,17 @@ head(dat)
 
 library(dplyr)
 
-ref <- Reduce(
-  function(x,y) full_join(x, y, by = c("chrom", "pos", "strand", "mc_class")),
-  dat) %>%
+ref <- 
+  Reduce(
+    function(x,y) full_join(x, y, by = c("chrom", "pos", "strand", "mc_class")),
+    dat
+  ) %>%
   arrange(chrom, pos, strand, mc_class) %>%
   as.data.frame
 
 
 # Checking against processed data -----------------------------------------
 
-check <- read.csv('test/out/out.csv', stringsAsFactors = FALSE)
+check <- read.csv('out/out.csv', stringsAsFactors = FALSE)
 
 all.equal(check, ref)
