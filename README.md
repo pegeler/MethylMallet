@@ -1,5 +1,5 @@
-methyl
-======
+MethylMallet
+============
 
 Full outer join of very large files using low resources.
 
