@@ -20,7 +20,7 @@ required arguments:
   -o OUT_FILE     file name to be output to
 
 optional arguments:
-  -h, --help      show this help message and exit
+  -h,             show this help message and exit
   -p              do sorting operations using GNU parallel
   -S BUFFER_SIZE  buffer size allocated to sorting operation
 EOF
@@ -76,14 +76,14 @@ echo "$progname: Sorting the inputs..." >&2
 if [[ -n "$do_par" && -x "$(command -v parallel)" ]]; then
   echo "$progname: Sorting files in parallel" >&2
   parallel --eta --noswap --load 80% \
-    $(printf 'tail -q -n +2 {} | sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -S %s -o "%s/sorted_{/}"' $buffer_size $work_dir) \
+    $(printf 'tail -q -n +2 {} | sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -S %s -T %s -o "%s/sorted_{/}"' $buffer_size $work_dir $work_dir) \
     ::: "$@"
 else
   echo "$progname: Sorting files one-by-one" >&2
   for f in "$@"; do
     echo "$progname:   Working on $(basename $f)" >&2
     tail -q -n +2 "$f" | \
-      sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -S $buffer_size -o "${work_dir}/sorted_$(basename $f)"
+      sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -S $buffer_size -T $work_dir -o "${work_dir}/sorted_$(basename $f)"
   done
 fi
 
@@ -94,7 +94,7 @@ echo "$progname: Making the key file..." >&2
 echo "chrom,pos,strand,mc_class" > ${work_dir}/out.csv
 
 # Find the keys and write to csv
-sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -u -m -S $buffer_size ${work_dir}/sorted_* | \
+sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -u -m -S $buffer_size -T $work_dir ${work_dir}/sorted_* | \
   cut -f 1,2,3,4 | \
   tr '\t' , \
   >> ${work_dir}/out.csv
