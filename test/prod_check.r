@@ -37,8 +37,7 @@ names(check_data) <- scan(
   quiet = TRUE)
 
 # Get sample lines --------------------------------------------------------
-f <- function(x, pos) semi_join(x, check_data,
-      by = c("chrom"="V1", "pos"="V2", "strand"="V3", "mc_class"="V4"))
+f <- function(x, pos) semi_join(x, check_data, by = c("chrom", "pos", "strand", "mc_class"))
 
 read_samples <- function(x) {
   read_tsv_chunked(
