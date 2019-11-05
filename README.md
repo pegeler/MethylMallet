@@ -15,7 +15,7 @@ positional arguments:
   FILE            file(s) to be joined
 
 required arguments:
-  -d DIR          working directory
+  -d DIR          working directory (will be created if doesn't exist)
   -o OUT_FILE     file name to be output to
 
 optional arguments:
@@ -23,3 +23,5 @@ optional arguments:
   -p              do sorting operations using GNU parallel
   -S BUFFER_SIZE  buffer size allocated to sorting operation
 ```
+
+_NOTE: The working directory should be empty._
