@@ -20,7 +20,7 @@ required arguments:
   -o OUT_FILE     file name to be output to
 
 optional arguments:
-  -h,             show this help message and exit
+  -h              show this help message and exit
   -p              do sorting operations using GNU parallel
   -S BUFFER_SIZE  buffer size allocated to sorting operation
 EOF
