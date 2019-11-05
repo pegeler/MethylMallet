@@ -78,17 +78,23 @@ if [[ -n "$do_par" && -x "$(command -v parallel)" ]]; then
   parallel --eta --noswap --load 80% \
     $(printf 'tail -q -n +2 {} | sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -S %s -T %s -o "%s/sorted_{/}"' $buffer_size $work_dir $work_dir) \
     ::: "$@"
+    CHECKPOINT=$SECONDS
 else
   echo "$progname: Sorting files one-by-one" >&2
+  CHECKPOINT=$SECONDS
+  i=1
   for f in "$@"; do
-    echo "$progname:   Working on $(basename $f)" >&2
+    echo -n "$progname:   $i/$#: $(basename $f)" >&2
     tail -q -n +2 "$f" | \
       sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -S $buffer_size -T $work_dir -o "${work_dir}/sorted_$(basename $f)"
+    echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
+    CHECKPOINT=$SECONDS
+    ((i++))
   done
 fi
 
 # KEY FILE --------------------------------------------------------------------
-echo "$progname: Making the key file..." >&2
+echo -n "$progname: Making the key file..." >&2
 
 # Put down the header
 echo "chrom,pos,strand,mc_class" > ${work_dir}/out.csv
@@ -99,14 +105,21 @@ sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -u -m -S $buffer_size -T $work_dir ${work_dir
   tr '\t' , \
   >> ${work_dir}/out.csv
 
+echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
+CHECKPOINT=$SECONDS
+
 # APPEND ----------------------------------------------------------------------
 echo "$progname: Appending columns..." >&2
 
 # Append columns one-by-one using python3 script
+i=1
 for f in ${work_dir}/sorted_*; do
-  echo "$progname:   Working on $(basename $f)" >&2
+  echo -n "$progname:   $i/$#: $(basename $f)" >&2
   python3 src/do_join.py "$f"
   rm "$f"
+  echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
+  CHECKPOINT=$SECONDS
+  ((i++))
 done
 
 # DONE ------------------------------------------------------------------------
