@@ -8,8 +8,8 @@ Please don't judge :)
 
 Plan of attack
 ===========================
-- Get new data from stdin
 - Read existing table as working/out.csv
+- Append column from file (sys.argv[1])
 - Write concatenated lines to working/tmp.csv
 - Copy tmp.csv to out.csv
 

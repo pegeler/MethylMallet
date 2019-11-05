@@ -16,7 +16,7 @@ positional arguments:
   FILE            file(s) to be joined
 
 required arguments:
-  -d DIR          working directory
+  -d DIR          working directory (doesn't need to exist but should be empty)
   -o OUT_FILE     file name to be output to
 
 optional arguments:
@@ -106,10 +106,10 @@ echo "$progname: Appending columns..." >&2
 for f in ${work_dir}/sorted_*; do
   echo "$progname:   Working on $(basename $f)" >&2
   python3 src/do_join.py "$f"
+  rm "$f"
 done
 
 # DONE ------------------------------------------------------------------------
-rm ${work_dir}/sorted_*
 
 mv "${work_dir}/out.csv" "$out_file"
 
