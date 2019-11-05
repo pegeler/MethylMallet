@@ -21,14 +21,13 @@ import re
 import shutil
 import os.path
 
-# Get inputs
-input_file = sys.argv[1]
-work_dir, file_name = os.path.split(input_file)
+# Get input file
+work_dir, file_name = os.path.split(sys.argv[1])
 
 # Open files
-temp = open(os.path.join(work_dir, 'tmp.csv'), 'w+')
-work = open(os.path.join(work_dir, 'out.csv'), 'r')
-infile = open(input_file, 'r')
+temp   = open(os.path.join(work_dir, 'tmp.csv'), 'w+')
+work   = open(os.path.join(work_dir, 'out.csv'), 'r')
+infile = open(os.path.join(work_dir, file_name), 'r')
 
 # Header
 header = work.readline().strip() + ','
