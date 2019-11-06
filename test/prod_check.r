@@ -4,10 +4,10 @@ library(dplyr)
 
 # User-entered params -----------------------------------------------------
 
-out_file <- "../working/test.csv"
-ddir <- "../dat/"
-n_checks <- 100L
 set.seed(777)
+out_file <- file.path(Sys.getenv("DDIR"), "methylation.csv")
+ddir     <- file.path(Sys.getenv("DDIR"), "methyl-seq-data")
+n_checks <- 1000L
 
 # Process Raw Files -------------------------------------------------------
 

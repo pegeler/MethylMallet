@@ -116,6 +116,9 @@ venv.bak/
 ##################################################
 # Begin R
 ##################################################
+# User environment variables
+.Renviron
+
 # History files
 .Rhistory
 .Rapp.history
