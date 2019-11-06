@@ -84,9 +84,10 @@ else
   CHECKPOINT=$SECONDS
   i=1
   for f in "$@"; do
-    echo -n "$progname:   $i/$#: $(basename $f)" >&2
-    tail -q -n +2 "$f" | \
-      sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -S $buffer_size -T $work_dir -o "${work_dir}/sorted_$(basename $f)"
+    echo -n "$progname: $(printf '% 5i' $i)/$#: $(basename $f)" >&2
+    zcat "$f" | \
+      tail -q -n +2 | \
+      sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -S $buffer_size -T $work_dir -o "${work_dir}/sorted_$(basename $f .gz)"
     echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
     CHECKPOINT=$SECONDS
     ((i++))
@@ -114,7 +115,7 @@ echo "$progname: Appending columns..." >&2
 # Append columns one-by-one using python3 script
 i=1
 for f in ${work_dir}/sorted_*; do
-  echo -n "$progname:   $i/$#: $(basename $f)" >&2
+  echo -n "$progname: $(printf '% 5i' $i)/$#: $(basename $f)" >&2
   python3 src/do_join.py "$f"
   rm "$f"
   echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2

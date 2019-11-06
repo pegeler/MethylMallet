@@ -11,7 +11,7 @@ set.seed(777)
 
 # Process Raw Files -------------------------------------------------------
 
-files <- list.files(ddir, full.names = TRUE)
+files <- list.files(ddir, pattern = '.*\\.tsv(\\.gz)?$', full.names = TRUE)
 file_names <- strcapture("(GSM.*?)_", files, proto = list(character(1)))[,1]
 
 # Process output file -----------------------------------------------------
