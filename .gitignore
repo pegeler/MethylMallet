@@ -246,3 +246,4 @@ dkms.conf
 *.out
 *.app
 .Rproj.user
+*.html
