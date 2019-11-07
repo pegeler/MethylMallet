@@ -1,5 +1,5 @@
-MethylMallet
-============
+MethylMallet <img src='assets/mm_logo.png' alt='logo' style='float: right; height: 96px;' />
+===========================================
 
 Full outer join of very large files using low resources.
 
