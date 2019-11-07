@@ -34,7 +34,7 @@ header = work.readline().strip() + ','
 header += re.search(r'^sorted_(.*?)_', file_name).group(1) + '\n'
 temp.write(header)
 
-# Preload first line from stdin
+# Preload first line from infile
 candidate = infile.readline().strip().split()
 
 # Loop over working file
