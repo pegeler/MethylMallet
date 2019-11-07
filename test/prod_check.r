@@ -19,10 +19,13 @@ file_names <- strcapture("(GSM.*?)_", files, proto = list(character(1)))[,1]
 n_keys <- countLines(out_file)
 check_keys <- sort(sample(seq(2, n_keys), n_checks))
 
-check_lines <- character(n_checks)
-for ( i in seq_along(check_keys) ) {
-  check_lines[i] <- read_lines(out_file, skip = check_keys[i], n_max = 1)
-}
+#### Doesn't work
+subset_chunk <- function(x, pos) x[seq(pos, length(x)) %in% check_keys]
+check_lines <- read_lines_chunked( # TODO
+  out_file,
+  callback = ListCallback$new(subset_chunk),
+  chunk_size = 1e5)
+#### END Doesn't work
 
 check_data <- read.csv(
   header = FALSE,
@@ -37,12 +40,12 @@ names(check_data) <- scan(
   quiet = TRUE)
 
 # Get sample lines --------------------------------------------------------
-f <- function(x, pos) semi_join(x, check_data, by = c("chrom", "pos", "strand", "mc_class"))
+semi_join_chunk <- function(x, pos) semi_join(x, check_data, by = c("chrom", "pos", "strand", "mc_class"))
 
 read_samples <- function(x) {
   read_tsv_chunked(
       files[x],
-      callback = DataFrameCallback$new(f),
+      callback = DataFrameCallback$new(semi_join_chunk),
       chunk_size = 1e5,
       col_types = list(
         col_integer(),
@@ -56,7 +59,26 @@ read_samples <- function(x) {
     rename_at(vars(methylation_call), list(function(unused) file_names[x]))
 }
 
-dat <- lapply(seq_along(files), read_samples)
+if ( require(doParallel) ) {
+  cluster <- makeCluster(detectCores() - 1L)
+  registerDoParallel(cluster)
+  dat <- foreach(
+    f = seq_along(files),
+    #.combine = "bind_rows",
+    #.inorder = FALSE,
+    #.multicombine = TRUE,
+    .packages = c("dplyr","readr"),
+    .export = c(
+      "files",
+      "file_names",
+      "check_data",
+      "read_samples",
+      "semi_join_chunk")
+  ) %dopar% { read_samples(f) }
+  stopCluster(cluster)
+} else {
+  dat <- lapply(seq_along(files), read_samples)
+}
 
 ref <-
   Reduce(
