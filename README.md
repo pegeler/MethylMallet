@@ -1,5 +1,5 @@
-MethylMallet <img src='assets/mm_logo.png' alt='logo' style='float: right; height: 96px;' />
-===========================================
+MethylMallet <img src='assets/mm_logo.png' align='right' height='120px' />
+==========================================================================
 
 Full outer join of very large files using low resources.
 
@@ -29,4 +29,3 @@ _NOTE: The working directory should be empty._
 ## Test Data
 
 <https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE43857>
-
