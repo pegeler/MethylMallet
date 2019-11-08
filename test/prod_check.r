@@ -30,7 +30,7 @@ check_lines <- read_lines_chunked(
 check_data <- read.csv(
   header = FALSE,
   stringsAsFactors = FALSE,
-  text = check_lines)
+  text = do.call('c', check_lines))
 
 names(check_data) <- scan(
   out_file,
