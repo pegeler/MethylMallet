@@ -19,13 +19,13 @@ file_names <- strcapture("(GSM.*?)_", files, proto = list(character(1)))[,1]
 n_keys <- countLines(out_file)
 check_keys <- sort(sample(seq(2, n_keys), n_checks))
 
-#### Doesn't work
-subset_chunk <- function(x, pos) x[seq(pos, length(x)) %in% check_keys]
-check_lines <- read_lines_chunked( # TODO
+subset_chunk <- function(x, pos) {
+  x[seq(from = pos, along.with = x) %in% check_keys]
+}
+check_lines <- read_lines_chunked(
   out_file,
   callback = ListCallback$new(subset_chunk),
   chunk_size = 1e5)
-#### END Doesn't work
 
 check_data <- read.csv(
   header = FALSE,
