@@ -44,7 +44,7 @@ semi_join_chunk <- function(x, pos) semi_join(x, check_data, by = c("chrom", "po
 
 read_samples <- function(x) {
   col_names <- c("chrom", "pos", "strand", "mc_class", "methylation_call")
-  has_header <- scan(files[i], what = character(1), n = 1, quiet = TRUE) == "chrom"
+  has_header <- scan(files[x], what = character(1), n = 1, quiet = TRUE) == "chrom"
   read_tsv_chunked(
       files[x],
       callback = DataFrameCallback$new(semi_join_chunk),
@@ -68,9 +68,6 @@ if ( require(doParallel) ) {
   registerDoParallel(cluster)
   dat <- foreach(
     f = seq_along(files),
-    #.combine = "bind_rows",
-    #.inorder = FALSE,
-    #.multicombine = TRUE,
     .packages = c("dplyr","readr"),
     .export = c(
       "files",
