@@ -76,7 +76,7 @@ echo "$progname: Sorting the inputs..." >&2
 if [[ -n "$do_par" && -x "$(command -v parallel)" ]]; then
   echo "$progname: Sorting files in parallel" >&2
   parallel --eta --noswap --load 80% \
-    $(printf 'tail -q -n +2 {} | sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -S %s -T %s -o "%s/sorted_{/}"' $buffer_size $work_dir $work_dir) \
+    $(printf 'zcat {} | tail -q -n +2 | sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -S %s -T %s -o "%s/sorted_{/}"' $buffer_size $work_dir $work_dir) \
     ::: "$@"
     CHECKPOINT=$SECONDS
 else
@@ -116,8 +116,7 @@ echo "$progname: Appending columns..." >&2
 i=1
 for f in ${work_dir}/sorted_*; do
   echo -n "$progname: $(printf '% 5i' $i)/$#: $(basename $f)" >&2
-  # python3 python/do_join.py "$f"
-  bin/do_join "$f"
+  test -f "bin/do_join" && bin/do_join "$f" || python3 python/do_join.py "$f"
   rm "$f"
   echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
   CHECKPOINT=$SECONDS
