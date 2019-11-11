@@ -6,6 +6,7 @@ working/
 experiments/
 bin/*
 !bin/.keep
+methyl-seq-data/
 
 ##################################################
 # Begin python
