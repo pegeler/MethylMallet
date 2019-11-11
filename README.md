@@ -23,7 +23,6 @@ Full outer join of very large files using low resources.
     - g++ version 8 with libboost
     - python3
 - Optional
-  - GNU parallel
   - xz (compressing output file)
   - md5sum
   - R

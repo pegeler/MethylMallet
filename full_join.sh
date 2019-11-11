@@ -7,8 +7,7 @@ set -e
 # Usage -----------------------------------------------------------------------
 function usage {
   cat << EOF >&2
-usage: $progname [-h] [-p] [-d DIR] [-S BUFFER_SIZE] [-o OUT_FILE]
-                    FILE [FILE ...]
+usage: $progname [-h] [-d DIR] [-S BUFFER_SIZE] [-o OUT_FILE] FILE [FILE ...]
 
 Do a full outer join of tab-separated methylation files.
 
@@ -21,7 +20,6 @@ required arguments:
 
 optional arguments:
   -h              show this help message and exit
-  -p              do sorting operations using GNU parallel
   -S BUFFER_SIZE  buffer size allocated to sorting operation
 EOF
   exit 1
@@ -38,9 +36,6 @@ while getopts ":d:S:o:ph" opt; do
       ;;
     o)
       out_file=$OPTARG
-      ;;
-    p)
-      do_par=1
       ;;
     h)
       usage
@@ -73,26 +68,31 @@ mkdir -p "$work_dir"
 echo "$progname: Sorting the inputs..." >&2
 
 # Sort all of our input data files
-if [[ -n "$do_par" && -x "$(command -v parallel)" ]]; then
-  echo "$progname: Sorting files in parallel" >&2
-  parallel --eta --noswap --load 80% \
-    $(printf 'zcat {} | tail -q -n +2 | sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -S %s -T %s -o "%s/sorted_{/}"' $buffer_size $work_dir $work_dir) \
-    ::: "$@"
-    CHECKPOINT=$SECONDS
-else
-  echo "$progname: Sorting files one-by-one" >&2
+
+echo "$progname: Sorting files one-by-one" >&2
+CHECKPOINT=$SECONDS
+i=1
+for f in "$@"; do
+  echo -n "$progname: $(printf '% 5i' $i)/$#: $(basename $f)" >&2
+
+  # Find out if the first line has headers
+  first_line=$(zcat "$f" | head -n 1 | cut -f 1)
+  if [[ "$first_line" == "chrom" ]]; then
+    start_line=+2
+  else
+    start_line=+1
+  fi
+
+  # Pipe it through the sort
+  zcat "$f" | \
+    tail -q -n $start_line | \
+    sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -S $buffer_size -T $work_dir -o "${work_dir}/sorted_$(basename $f .gz)"
+
+  # Time stats
+  echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
   CHECKPOINT=$SECONDS
-  i=1
-  for f in "$@"; do
-    echo -n "$progname: $(printf '% 5i' $i)/$#: $(basename $f)" >&2
-    zcat "$f" | \
-      tail -q -n +2 | \
-      sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -S $buffer_size -T $work_dir -o "${work_dir}/sorted_$(basename $f .gz)"
-    echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
-    CHECKPOINT=$SECONDS
-    ((i++))
-  done
-fi
+  ((i++))
+done
 
 # KEY FILE --------------------------------------------------------------------
 echo -n "$progname: Making the key file..." >&2

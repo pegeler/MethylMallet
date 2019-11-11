@@ -43,11 +43,14 @@ names(check_data) <- scan(
 semi_join_chunk <- function(x, pos) semi_join(x, check_data, by = c("chrom", "pos", "strand", "mc_class"))
 
 read_samples <- function(x) {
+  col_names <- c("chrom", "pos", "strand", "mc_class", "methylation_call")
+  has_header <- scan(files[i], what = character(1), n = 1, quiet = TRUE) == "chrom"
   read_tsv_chunked(
       files[x],
       callback = DataFrameCallback$new(semi_join_chunk),
       chunk_size = 1e5,
       progress = FALSE,
+      col_names = if (has_header) TRUE else col_names,
       col_types = list(
         col_integer(),
         col_integer(),
