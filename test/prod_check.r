@@ -16,7 +16,7 @@ file_names <- strcapture("(GSM.*?)_", files, proto = list(character(1)))[,1]
 
 # Process output file -----------------------------------------------------
 
-n_keys <- countLines(out_file)
+n_keys <- countLines(out_file) # 65161486L
 check_keys <- sort(sample(seq(2, n_keys), n_checks))
 
 subset_chunk <- function(x, pos) {
@@ -47,6 +47,7 @@ read_samples <- function(x) {
       files[x],
       callback = DataFrameCallback$new(semi_join_chunk),
       chunk_size = 1e5,
+      progress = FALSE,
       col_types = list(
         col_integer(),
         col_integer(),

@@ -9,6 +9,7 @@ Full outer join of very large files using low resources.
 * [Setup](#setup)
     * [Tips on Ubuntu](#tips-on-ubuntu)
 * [Usage](#usage)
+* [Quality Control](#quality-control)
 * [Test Data](#test-data)
 * [Citation](#citation)
 
@@ -17,11 +18,20 @@ Full outer join of very large files using low resources.
 - Required
   - bash
   - GNU sort
+  - gzip (zcat)
   - One of the following:
     - g++ version 8 with libboost
     - python3
 - Optional
   - GNU parallel
+  - xz (compressing output file)
+  - md5sum
+  - R
+  - R packages
+    - doParallel
+    - R.utils
+    - dplyr
+    - readr
 
 This program has been implemented in Python 3 and C++. You may choose
 either one or the other based on resources available to you. The Python
@@ -73,6 +83,17 @@ optional arguments:
 ```
 
 _NOTE: The working directory should be empty._
+
+## Quality Control
+
+The full dataset is too big to be produced in R. However, small subsets of the data
+can be managed. Therefore, we can use random selection to verify results. This
+is somewhat imperfect, since we rely on the output file as the stock of keys
+from which we sample.
+
+A random sample of lines from the outfile (1000 by default) can be read in and
+then a dataset matching those lines can be reproduced by reading in the source
+data. Use *prod_check.r* in the *test/* folder to do this QC check.
 
 ## Test Data
 
