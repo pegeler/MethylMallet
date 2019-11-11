@@ -3,6 +3,15 @@ MethylMallet <img src='assets/mm_logo.png' align='right' height='120px' />
 
 Full outer join of very large files using low resources.
 
+## Table of Contents
+
+* [System Requirements](#system-requirements)
+* [Setup](#setup)
+    * [Tips on Ubuntu](#tips-on-ubuntu)
+* [Usage](#usage)
+* [Test Data](#test-data)
+* [Citation](#citation)
+
 ## System Requirements
 
 - Required
@@ -68,4 +77,11 @@ _NOTE: The working directory should be empty._
 ## Test Data
 
 <https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE43857>
+
+## Citation
+
+If you use this work to generate data for publication, please cite it.
+A possible citation is as follows.
+
+> Egeler, PW (2019). MethylMallet. Github Repository: <https://github.com/pegeler/MethylMallet>. Commit _put hash here_.
 
