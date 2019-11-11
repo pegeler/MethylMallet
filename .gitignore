@@ -4,7 +4,8 @@
 dat/
 working/
 experiments/
-test/out/
+bin/*
+!bin/.keep
 
 ##################################################
 # Begin python

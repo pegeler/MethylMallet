@@ -116,7 +116,7 @@ echo "$progname: Appending columns..." >&2
 i=1
 for f in ${work_dir}/sorted_*; do
   echo -n "$progname: $(printf '% 5i' $i)/$#: $(basename $f)" >&2
-  python3 src/do_join.py "$f"
+  bin/do_join "$f"
   rm "$f"
   echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
   CHECKPOINT=$SECONDS
