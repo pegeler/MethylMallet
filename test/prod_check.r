@@ -6,7 +6,7 @@ library(dplyr)
 
 set.seed(777)
 ddir     <- file.path(Sys.getenv("DDIR"), "methyl-seq-data")
-out_file <- file.path(ddir, "out.csv")
+out_file <- file.path(Sys.getenv("ODIR"), "methylation.csv")
 n_checks <- 1000L
 
 # Process Raw Files -------------------------------------------------------
