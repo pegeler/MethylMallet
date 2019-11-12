@@ -127,5 +127,5 @@ done
 
 mv "${work_dir}/out.csv" "$out_file"
 
-echo "$progname: Success! All files joined." >&2
+echo "$progname: Success! All files joined. ($SECONDS seconds total)" >&2
 echo "$progname: Combined comma-separated file saved in '$out_file'" >&2

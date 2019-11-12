@@ -5,8 +5,8 @@ library(dplyr)
 # User-entered params -----------------------------------------------------
 
 set.seed(777)
-ddir     <- file.path(Sys.getenv("DDIR"), "methyl-seq-data")
-out_file <- file.path(Sys.getenv("ODIR"), "methylation.csv")
+ddir     <- Sys.getenv("DDIR")
+out_file <- Sys.getenv("OUTFILE")
 n_checks <- 1000L
 
 # Process Raw Files -------------------------------------------------------
@@ -40,17 +40,21 @@ names(check_data) <- scan(
   quiet = TRUE)
 
 # Get sample lines --------------------------------------------------------
-semi_join_chunk <- function(x, pos) semi_join(x, check_data, by = c("chrom", "pos", "strand", "mc_class"))
+semi_join_chunk <- function(x, pos)
+  semi_join(x, check_data, by = c("chrom", "pos", "strand", "mc_class"))
 
 read_samples <- function(x) {
-  col_names <- c("chrom", "pos", "strand", "mc_class", "methylation_call")
+
+  col_names <- c("chrom", "pos", "strand", "mc_class", file_names[x])
   has_header <- scan(files[x], what = character(1), n = 1, quiet = TRUE) == "chrom"
+
   read_tsv_chunked(
       files[x],
       callback = DataFrameCallback$new(semi_join_chunk),
       chunk_size = 1e5,
       progress = FALSE,
-      col_names = if (has_header) TRUE else col_names,
+      skip = as.integer(has_header),
+      col_names = col_names,
       col_types = list(
         col_integer(),
         col_integer(),
@@ -59,8 +63,7 @@ read_samples <- function(x) {
         col_skip(),
         col_skip(),
         col_integer())
-    ) %>%
-    rename_at(vars(methylation_call), list(function(unused) file_names[x]))
+    )
 }
 
 if ( require(doParallel) ) {
@@ -81,8 +84,7 @@ if ( require(doParallel) ) {
   dat <- lapply(seq_along(files), read_samples)
 }
 
-ref <-
-  Reduce(
+ref <-Reduce(
     function(x,y) full_join(x, y, by = c("chrom", "pos", "strand", "mc_class")),
     dat
   ) %>%
