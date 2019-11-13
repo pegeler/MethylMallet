@@ -9,12 +9,14 @@ set -e
 # Usage -----------------------------------------------------------------------
 function usage {
   cat << EOF >&2
-usage: $progname [-h] [-d DIR] [-o OUT_FILE]
+usage: $progname [-h] -d DIR -o OUT_FILE
 
 Do a full outer join of tab-separated methylation files.
+This resumes the file append process if for some reason
+the script was prematurely terminated.
 
 required arguments:
-  -d DIR          working directory (doesn't need to exist but should be empty)
+  -d DIR          working directory from previous call
   -o OUT_FILE     file name to be output to
 
 optional arguments:
