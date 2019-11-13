@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "resume..."
+echo "resume..." >&2
 progname=$(basename $0)
 CHECKPOINT=$SECONDS
 
