@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "resume..." >&2
+echo "resuming..." >&2
 progname=$(basename $0)
 CHECKPOINT=$SECONDS
 
@@ -24,7 +24,7 @@ EOF
 }
 
 # Options ---------------------------------------------------------------------
-while getopts ":d:S:o:ph" opt; do
+while getopts ":d:o:h" opt; do
   case $opt in
     d)
       work_dir=$OPTARG
@@ -57,7 +57,7 @@ mkdir -p "$work_dir"
 echo "$progname: Resuming appending columns..." >&2
 
 i=1
-for f in ${work_dir}/sorted_*; do
+for f in "${work_dir}/sorted_"*; do
   echo -n "$progname: $(printf '% 5i' $i)/unknown: $(basename $f)" >&2
   test -f "bin/do_join" && bin/do_join "$f" || python3 python/do_join.py "$f"
   rm "$f"
