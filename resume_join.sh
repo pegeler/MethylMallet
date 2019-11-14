@@ -60,7 +60,8 @@ echo "$progname: Resuming appending columns..." >&2
 
 i=1
 for f in "${work_dir}/sorted_"*; do
-  echo -n "$progname: $(printf '% 5i' $i)/unknown: $(basename $f)" >&2
+  file_name=$(basename "$f")
+  echo -n "$progname: $(printf '% 5i' $i)/unknown: $file_name" >&2
   test -f "bin/do_join" && bin/do_join "$f" || python3 python/do_join.py "$f"
   rm "$f"
   echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2

@@ -1,8 +1,11 @@
 #!/bin/bash
 
-progname=$(basename $0)
+progname=$(basename "$0")
 
 set -e
+
+# Standardize sort order
+export LC_ALL=C
 
 # Usage -----------------------------------------------------------------------
 function usage {
@@ -73,7 +76,9 @@ echo "$progname: Sorting files one-by-one" >&2
 CHECKPOINT=$SECONDS
 i=1
 for f in "$@"; do
-  echo -n "$progname: $(printf '% 5i' $i)/$#: $(basename $f)" >&2
+  file_name=$(basename "$f")
+  file_stem=$(basename "$f" .gz)
+  echo -n "$progname: $(printf '% 5i' $i)/$#: $file_name" >&2
 
   # Find out if the first line has headers
   first_line=$(zcat "$f" | head -n 1 | cut -f 1)
@@ -86,7 +91,7 @@ for f in "$@"; do
   # Pipe it through the sort
   zcat "$f" | \
     tail -q -n $start_line | \
-    sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -S $buffer_size -T "$work_dir" -o "${work_dir}/sorted_$(basename $f .gz)"
+    sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -S $buffer_size -T "$work_dir" -o "${work_dir}/sorted_${file_stem}"
 
   # Time stats
   echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
@@ -115,7 +120,8 @@ echo "$progname: Appending columns..." >&2
 # Append columns one-by-one using python3 script
 i=1
 for f in "${work_dir}/sorted_"*; do
-  echo -n "$progname: $(printf '% 5i' $i)/$#: $(basename $f)" >&2
+  file_name=$(basename "$f")
+  echo -n "$progname: $(printf '% 5i' $i)/$#: $file_name" >&2
   test -f "bin/do_join" && bin/do_join "$f" || python3 python/do_join.py "$f"
   rm "$f"
   echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
