@@ -7,7 +7,6 @@ Full outer join of very large files using low resources.
 
 * [System Requirements](#system-requirements)
 * [Setup](#setup)
-    * [Tips on Ubuntu](#tips-on-ubuntu)
 * [Usage](#usage)
 * [Quality Control](#quality-control)
 * [Test Data](#test-data)
@@ -16,25 +15,23 @@ Full outer join of very large files using low resources.
 ## System Requirements
 
 - Required
-  - bash
-  - GNU sort
-  - gzip (zcat)
+  - bash, GNU core utils, gzip, _&c._
   - One of the following:
-    - g++ version 8 with libboost
+    - gcc
     - python3
 - Optional
   - xz (compressing output file)
+  - make
   - md5sum
-  - R
-  - R packages
+  - R with the follwoing packages
     - doParallel
     - R.utils
     - dplyr
     - readr
 
-This program has been implemented in Python 3 and C++. You may choose
+This program has been implemented in Python 3 and C. You may choose
 either one or the other based on resources available to you. The Python
-version takes about 65 percent more time per file. But Python 3 will
+version takes about 9x more time per file. But Python 3 will
 not require extra tooling associated with building the executable from
 source code.
 
@@ -44,21 +41,6 @@ By default, the program will use a binary executable to do the join
 operation, if it is available. Otherwise, it will fall back to the
 Python 3 script. To create the binary executable, run `make` in the root
 project directory.
-
-### Tips on Ubuntu
-
-On Ubuntu 18.04, you will likely need to install a few extra things:
-
-```bash
-sudo apt-get update
-sudo apt-get install g++-8 libbost-dev
-```
-
-Earlier versions of Ubuntu need to add the [Ubuntu toolchain repo](https://launchpad.net/~ubuntu-toolchain-r/+archive/ubuntu/test). Do this before running the code above:
-
-```bash
-sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-```
 
 ## Usage
 
