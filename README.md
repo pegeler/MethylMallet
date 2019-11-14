@@ -85,5 +85,5 @@ data. Use *prod_check.r* in the *test/* folder to do this QC check.
 If you use this work to generate data for publication, please cite it.
 A possible citation is as follows.
 
-> Egeler, PW (2019). MethylMallet. Github Repository: <https://github.com/pegeler/MethylMallet>. Commit _put hash here_.
+> Egeler, PW (2019). MethylMallet. Github Repository: <https://github.com/SpectrumHealthResearch/MethylMallet>. Commit _put hash here_.
 
