@@ -86,7 +86,7 @@ for f in "$@"; do
   # Pipe it through the sort
   zcat "$f" | \
     tail -q -n $start_line | \
-    sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -S $buffer_size -T $work_dir -o "${work_dir}/sorted_$(basename $f .gz)"
+    sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -S $buffer_size -T "$work_dir" -o "${work_dir}/sorted_$(basename $f .gz)"
 
   # Time stats
   echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
@@ -98,13 +98,13 @@ done
 echo -n "$progname: Making the key file..." >&2
 
 # Put down the header
-echo "chrom,pos,strand,mc_class" > ${work_dir}/out.csv
+echo "chrom,pos,strand,mc_class" > "${work_dir}/out.csv"
 
 # Find the keys and write to csv
-sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -u -m -S $buffer_size -T $work_dir ${work_dir}/sorted_* | \
+sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -u -m -S $buffer_size -T "$work_dir" "${work_dir}/sorted_"* | \
   cut -f 1,2,3,4 | \
   tr '\t' , \
-  >> ${work_dir}/out.csv
+  >> "${work_dir}/out.csv"
 
 echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
 CHECKPOINT=$SECONDS
@@ -114,7 +114,7 @@ echo "$progname: Appending columns..." >&2
 
 # Append columns one-by-one using python3 script
 i=1
-for f in ${work_dir}/sorted_*; do
+for f in "${work_dir}/sorted_"*; do
   echo -n "$progname: $(printf '% 5i' $i)/$#: $(basename $f)" >&2
   test -f "bin/do_join" && bin/do_join "$f" || python3 python/do_join.py "$f"
   rm "$f"
