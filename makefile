@@ -1,5 +1,5 @@
 CXX = gcc
-CXXFLAGS=-O3
+CXXFLAGS=-O3 -std=gnu11
 LIBS=
 DEPS=
 
