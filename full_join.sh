@@ -1,6 +1,7 @@
 #!/bin/bash
 
-progname=$(basename "$0")
+progname="$( basename "$0" )"
+progpath="$( dirname "$( readlink -f "$0" )" )"
 
 set -e
 
@@ -122,7 +123,9 @@ i=1
 for f in "${work_dir}/sorted_"*; do
   file_name=$(basename "$f")
   echo -n "$progname: $(printf '% 5i' $i)/$#: $file_name" >&2
-  test -f "bin/do_join" && bin/do_join "$f" || python3 python/do_join.py "$f"
+  test -f "$progpath/bin/do_join" && \
+    "$progpath/bin/do_join" "$f" || \
+    python3 "$progpath/python/do_join.py" "$f"
   rm "$f"
   echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
   CHECKPOINT=$SECONDS
