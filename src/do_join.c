@@ -18,7 +18,8 @@ int compare_keys(char* s1, char* s2)
       continue;
     }
     // No match
-    if ( s1[c] != s2[c] ) return 0;
+    if ( s1[c] != s2[c] )
+      return 0;
     c++;
   }
   return 1;
@@ -69,7 +70,8 @@ int main(int argc, char* argv[])
         continue;
       }
     }
-    if ( in_tag ) putc(argv[1][i], ftmp);
+    if ( in_tag )
+      putc(argv[1][i], ftmp);
   }
 
   // File line buffers

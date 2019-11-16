@@ -6,7 +6,7 @@ progpath="$( dirname "$( readlink -f "$0" )" )"
 set -e
 
 # Standardize sort order
-export LC_ALL=C
+export LC_ALL="en_US.UTF-8"
 
 # Usage -----------------------------------------------------------------------
 function usage {
