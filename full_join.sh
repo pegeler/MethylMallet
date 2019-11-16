@@ -121,10 +121,9 @@ echo "$progname: Appending columns..." >&2
 # Append columns one-by-one using python3 script
 i=1
 for f in "${work_dir}/sorted_"*; do
-  file_name=$(basename "$f")
-  echo -n "$progname: $(printf '% 5i' $i)/$#: $file_name" >&2
-  test -f "$progpath/bin/do_join" && \
-    "$progpath/bin/do_join" "$f" || \
+  echo -n "$progname: $(printf '% 5i' $i)/$#: $(basename "$f")" >&2
+  test -f   "$progpath/bin/do_join" && \
+            "$progpath/bin/do_join" "$f" || \
     python3 "$progpath/python/do_join.py" "$f"
   rm "$f"
   echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
