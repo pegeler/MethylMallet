@@ -3,9 +3,6 @@
 #include <string.h>
 #include <libgen.h>
 
-// fgets result unused for candidate file
-#pragma GCC diagnostic ignored "-Wunused-result"
-
 // Assume keys and first three fields are
 // under 99 characters long (incl. \n)
 #define BASE_LEN 100
@@ -79,7 +76,8 @@ int main(int argc, char* argv[])
   char line[BASE_LEN + 2 * nf], candidate[BASE_LEN];
 
   // Preload the candidate
-  fgets(candidate, BASE_LEN, fin);
+  int rc;
+  rc = fgets(candidate, BASE_LEN, fin) != NULL;
 
   // Iterate over lines
   while ( fgets(line, BASE_LEN + 2 * nf, fout) != NULL )
@@ -89,10 +87,10 @@ int main(int argc, char* argv[])
     fputs(line, ftmp);
     putc(',', ftmp);
 
-    if ( compare_keys(line, candidate) )
+    if ( rc && compare_keys(line, candidate) )
     {
       putc(candidate[strlen(candidate) - 2], ftmp);
-      fgets(candidate, BASE_LEN, fin);
+      rc = fgets(candidate, BASE_LEN, fin) != NULL;
     }
 
     putc('\n', ftmp);
