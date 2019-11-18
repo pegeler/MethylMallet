@@ -4,6 +4,7 @@
 import sys
 import re
 import os.path
+from resource import getrlimit, RLIMIT_NOFILE
 
 
 class Mfile:
@@ -41,6 +42,11 @@ class Mfile:
 
 
 if __name__ == "__main__":
+
+    n_files = len(sys.argv[1:])
+
+    if n_files + 2 > getrlimit(RLIMIT_NOFILE)[0]:
+        raise Exception("Can't open that many files.")
 
     # Initialize methylation files
     files = [Mfile(f) for f in sys.argv[1:]]
