@@ -27,10 +27,12 @@ int compare_keys(char* s1, char* s2)
 
 int main(int argc, char* argv[])
 {
-  // Get directory name
-  char *dirc, *dname;
+  // Get file name and directory path
+  char *dirc, *dname, *basec, *bname;
   dirc  = strdup(argv[1]);
   dname = dirname(dirc);
+  basec  = strdup(argv[1]);
+  bname = basename(basec);
 
   // Construct working file paths
   char out_path[strlen(dname) + 9],
@@ -60,9 +62,9 @@ int main(int argc, char* argv[])
   putc(',', ftmp);
 
   // Add Accession Tag
-  for ( int i=0, in_tag=0; i < strlen(argv[1]); i++ )
+  for ( int i=0, in_tag=0; bname[i]; i++ )
   {
-    if ( argv[1][i] == '_' ) {
+    if ( bname[i] == '_' ) {
       if ( in_tag++ ) {
         putc('\n', ftmp);
         break;
@@ -71,7 +73,7 @@ int main(int argc, char* argv[])
       }
     }
     if ( in_tag )
-      putc(argv[1][i], ftmp);
+      putc(bname[i], ftmp);
   }
 
   // File line buffers
