@@ -3,9 +3,6 @@
 #include <string.h>
 #include <libgen.h>
 
-// fgets result unused for candidate file
-#pragma GCC diagnostic ignored "-Wunused-result"
-
 // Assume keys and first three fields are
 // under 99 characters long (incl. \n)
 #define BASE_LEN 100
@@ -21,7 +18,8 @@ int compare_keys(char* s1, char* s2)
       continue;
     }
     // No match
-    if ( s1[c] != s2[c] ) return 0;
+    if ( s1[c] != s2[c] )
+      return 0;
     c++;
   }
   return 1;
@@ -29,10 +27,12 @@ int compare_keys(char* s1, char* s2)
 
 int main(int argc, char* argv[])
 {
-  // Get directory name
-  char *dirc, *dname;
+  // Get file name and directory path
+  char *dirc, *dname, *basec, *bname;
   dirc  = strdup(argv[1]);
   dname = dirname(dirc);
+  basec  = strdup(argv[1]);
+  bname = basename(basec);
 
   // Construct working file paths
   char out_path[strlen(dname) + 9],
@@ -62,9 +62,9 @@ int main(int argc, char* argv[])
   putc(',', ftmp);
 
   // Add Accession Tag
-  for ( int i=0, in_tag=0; i < strlen(argv[1]); i++ )
+  for ( int i=0, in_tag=0; bname[i]; i++ )
   {
-    if ( argv[1][i] == '_' ) {
+    if ( bname[i] == '_' ) {
       if ( in_tag++ ) {
         putc('\n', ftmp);
         break;
@@ -72,14 +72,16 @@ int main(int argc, char* argv[])
         continue;
       }
     }
-    if ( in_tag ) putc(argv[1][i], ftmp);
+    if ( in_tag )
+      putc(bname[i], ftmp);
   }
 
   // File line buffers
   char line[BASE_LEN + 2 * nf], candidate[BASE_LEN];
 
   // Preload the candidate
-  fgets(candidate, BASE_LEN, fin);
+  int rc;
+  rc = fgets(candidate, BASE_LEN, fin) != NULL;
 
   // Iterate over lines
   while ( fgets(line, BASE_LEN + 2 * nf, fout) != NULL )
@@ -89,10 +91,10 @@ int main(int argc, char* argv[])
     fputs(line, ftmp);
     putc(',', ftmp);
 
-    if ( compare_keys(line, candidate) )
+    if ( rc && compare_keys(line, candidate) )
     {
       putc(candidate[strlen(candidate) - 2], ftmp);
-      fgets(candidate, BASE_LEN, fin);
+      rc = fgets(candidate, BASE_LEN, fin) != NULL;
     }
 
     putc('\n', ftmp);

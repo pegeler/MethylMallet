@@ -1,6 +1,9 @@
-library(R.utils)
-library(readr)
-library(dplyr)
+#!/usr/bin/env Rscript
+suppressPackageStartupMessages({
+  library(readr)
+  library(dplyr)
+  dopar <- require(doParallel)
+})
 
 # User-entered params -----------------------------------------------------
 
@@ -15,8 +18,8 @@ files <- list.files(ddir, pattern = '.*\\.tsv(\\.gz)?$', full.names = TRUE)
 file_names <- strcapture("(GSM.*?)_", files, proto = list(character(1)))[,1]
 
 # Process output file -----------------------------------------------------
-
-n_keys <- countLines(out_file) # 65161486L
+wc_out <- system(paste("wc -l", out_file, "| awk '{print $1}'"), intern = TRUE)
+n_keys <- as.integer(wc_out) # 65161486L
 check_keys <- sort(sample(seq(2, n_keys), n_checks))
 
 subset_chunk <- function(x, pos) {
@@ -66,18 +69,12 @@ read_samples <- function(x) {
     )
 }
 
-if ( require(doParallel) ) {
+if ( dopar ) {
   cluster <- makeCluster(detectCores() - 1L)
   registerDoParallel(cluster)
   dat <- foreach(
     f = seq_along(files),
-    .packages = c("dplyr","readr"),
-    .export = c(
-      "files",
-      "file_names",
-      "check_data",
-      "read_samples",
-      "semi_join_chunk")
+    .packages = c("dplyr","readr")
   ) %dopar% { read_samples(f) }
   stopCluster(cluster)
 } else {
@@ -92,5 +89,13 @@ ref <-Reduce(
   as.data.frame
 
 # Check if equal ----------------------------------------------------------
-
-all.equal(check_data, ref)
+check <- all.equal(check_data, ref)
+cat(sprintf(
+"MethylMallet Quality Control Check...
+=============================================================================
+  Check file name:         %s
+  Number of lines checked: %i
+  Result:                  %s
+-----------------------------------------------------------------------------
+", out_file, n_checks, ifelse(isTRUE(check), "OK", "FAIL"))
+)

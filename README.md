@@ -25,7 +25,6 @@ Full outer join of very large files using low resources.
   - md5sum
   - R with the follwoing packages
     - doParallel
-    - R.utils
     - dplyr
     - readr
 
@@ -67,14 +66,14 @@ _NOTE: The working directory should be empty._
 
 ## Quality Control
 
-The full dataset is too big to be produced in R. However, small subsets of the data
-can be managed. Therefore, we can use random selection to verify results. This
-is somewhat imperfect, since we rely on the output file as the stock of keys
-from which we sample.
+The full dataset is too big to be produced in R. However, small subsets of the
+data can be managed. Therefore, we can use random selection to verify results.
+This is somewhat imperfect, since we rely on the output file as the stock of
+keys from which we sample.
 
 A random sample of lines from the outfile (1000 by default) can be read in and
 then a dataset matching those lines can be reproduced by reading in the source
-data. Use *prod_check.r* in the *test/* folder to do this QC check.
+data. Use *prod_check.r* in the *qc/* folder to do this QC check.
 
 ## Test Data
 
