@@ -121,7 +121,9 @@ CHECKPOINT=$SECONDS
 
 # APPEND ----------------------------------------------------------------------
 echo -n "$progname: Appending columns..." >&2
-python3 "$progpath/python/do_join2.py" "${work_dir}/sorted_"*
+pushd "$progpath" > /dev/null
+python3 -m src "${work_dir}/sorted_"*
+popd > /dev/null
 echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
 
 # DONE ------------------------------------------------------------------------
