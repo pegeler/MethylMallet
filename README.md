@@ -6,7 +6,6 @@ Full outer join of very large files using low resources.
 ## Table of Contents
 
 * [System Requirements](#system-requirements)
-* [Setup](#setup)
 * [Usage](#usage)
 * [Quality Control](#quality-control)
 * [Test Data](#test-data)
@@ -16,49 +15,32 @@ Full outer join of very large files using low resources.
 
 - Required
   - bash, GNU core utils, gzip, _&c._
-  - One of the following:
-    - gcc
-    - python3
+  - python3
 - Optional
   - xz (compressing output file)
-  - make
   - md5sum
   - R with the follwoing packages
     - doParallel
     - dplyr
     - readr
 
-This program has been implemented in Python 3 and C. You may choose
-either one or the other based on resources available to you. The Python
-version takes about 9x more time per file. But Python 3 will
-not require extra tooling associated with building the executable from
-source code.
-
-## Setup
-
-By default, the program will use a binary executable to do the join
-operation, if it is available. Otherwise, it will fall back to the
-Python 3 script. To create the binary executable, run `make` in the root
-project directory.
-
 ## Usage
 
 ```
-usage: ./full_join.sh [-h] [-p] [-d DIR] [-S BUFFER_SIZE] [-o OUT_FILE]
-                      FILE [FILE ...]
+usage: full_join.sh [-h] [-k] -d DIR -S BUFFER_SIZE -o OUT_FILE FILE [FILE ...]
 
 Do a full outer join of tab-separated methylation files.
 
 positional arguments:
-  FILE            file(s) to be joined. These must be gz compressed.
+  FILE            files to be joined
 
 required arguments:
-  -d DIR          working directory (will be created if doesn't exist)
+  -d DIR          working directory (doesn't need to exist but should be empty)
   -o OUT_FILE     file name to be output to
 
 optional arguments:
   -h              show this help message and exit
-  -p              do sorting operations using GNU parallel
+  -k              keep intermediary files
   -S BUFFER_SIZE  buffer size allocated to sorting operation
 ```
 
