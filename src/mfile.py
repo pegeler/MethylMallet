@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
-import os
+import os.path
 
 
 class Mfile:
