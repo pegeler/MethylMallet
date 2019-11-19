@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import os.path
+import os
 from tempfile import TemporaryFile, TemporaryDirectory
 
 from .mfile import Mfile
@@ -28,6 +28,10 @@ class Mallet:
             yield files[i:i + self.chunk_size]
 
     def _gather_columns(self, files):
+        # Header
+        self.tmp_files[-1].write(','.join([f.tag for f in files]) + '\n')
+
+        # Values
         for key in self.keys:
             key_split = key.split(',')
             data_line = []
@@ -38,13 +42,14 @@ class Mallet:
                 else:
                     data_line.append('')
             self.tmp_files[-1].write(','.join(data_line) + '\n')
+
+        # Seek back to the top
         self.tmp_files[-1].seek(0)
 
     # WORKHORSE FUNCTIONS ---------------------------------------------------
     def _iterate_over_files(self):
         for infile_chunk in self._chunk_files(self.infiles):
             files = [Mfile(f) for f in infile_chunk]
-            self.header += ',' + ','.join([f.tag for f in files])
             self.tmp_files.append(TemporaryFile(mode='w+',
                                                 dir=self.tmp_dir.name))
             self._gather_columns(files)
@@ -52,7 +57,13 @@ class Mallet:
 
     def _write_final_output(self):
         with open(os.path.join(self.work_dir, 'out.csv'), 'w') as fout:
-            fout.write(self.header + '\n')
+
+            # Header
+            tag_line = [tmp.readline().strip() for tmp in self.tmp_files]
+            fout.write(self.header + ',' + ','.join(tag_line) + '\n')
+            del tag_line
+
+            # Values
             for key in self.keys:
                 data_line = [tmp.readline().strip() for tmp in self.tmp_files]
                 fout.write(key + ',' + ','.join(data_line) + '\n')
