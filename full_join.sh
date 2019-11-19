@@ -11,7 +11,7 @@ export LC_ALL="en_US.UTF-8"
 # Usage -----------------------------------------------------------------------
 function usage {
   cat << EOF >&2
-usage: $progname [-h] [-d DIR] [-S BUFFER_SIZE] [-o OUT_FILE] FILE [FILE ...]
+usage: $progname [-h] [-k] -d DIR -S BUFFER_SIZE -o OUT_FILE FILE [FILE ...]
 
 Do a full outer join of tab-separated methylation files.
 
@@ -24,13 +24,14 @@ required arguments:
 
 optional arguments:
   -h              show this help message and exit
+  -k              keep intermediary files
   -S BUFFER_SIZE  buffer size allocated to sorting operation
 EOF
   exit 1
 }
 
 # Options ---------------------------------------------------------------------
-while getopts ":d:S:o:ph" opt; do
+while getopts ":d:S:o:kh" opt; do
   case $opt in
     d)
       work_dir=$OPTARG
@@ -43,6 +44,9 @@ while getopts ":d:S:o:ph" opt; do
       ;;
     h)
       usage
+      ;;
+    k)
+      keep_files=true
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -104,36 +108,28 @@ done
 echo -n "$progname: Making the key file..." >&2
 
 # Put down the header
-echo "chrom,pos,strand,mc_class" > "${work_dir}/out.csv"
+echo "chrom,pos,strand,mc_class" > "${work_dir}/keys.csv"
 
 # Find the keys and write to csv
 sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -u -m -S $buffer_size -T "$work_dir" "${work_dir}/sorted_"* | \
   cut -f 1,2,3,4 | \
   tr '\t' , \
-  >> "${work_dir}/out.csv"
+  >> "${work_dir}/keys.csv"
 
 echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
 CHECKPOINT=$SECONDS
 
 # APPEND ----------------------------------------------------------------------
-echo "$progname: Appending columns..." >&2
-
-# Append columns one-by-one using python3 script
-i=1
-for f in "${work_dir}/sorted_"*; do
-  echo -n "$progname: $(printf '% 5i' $i)/$#: $(basename "$f")" >&2
-  test -f   "$progpath/bin/do_join" && \
-            "$progpath/bin/do_join" "$f" || \
-    python3 "$progpath/python/do_join.py" "$f"
-  rm "$f"
-  echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
-  CHECKPOINT=$SECONDS
-  ((i++))
-done
+echo -n "$progname: Appending columns..." >&2
+pushd "$progpath" > /dev/null
+python3 -m src "${work_dir}/sorted_"*
+popd > /dev/null
+echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
 
 # DONE ------------------------------------------------------------------------
 
 mv "${work_dir}/out.csv" "$out_file"
 
+test -z "$keep_files" && rm "${work_dir}/keys.csv" "${work_dir}/sorted_"*
+
 echo "$progname: Success! All files joined. ($SECONDS seconds total)" >&2
-echo "$progname: Combined comma-separated file saved in '$out_file'" >&2

@@ -12,7 +12,7 @@ set -e
 # Usage -----------------------------------------------------------------------
 function usage {
   cat << EOF >&2
-usage: $progname [-h] -d DIR -o OUT_FILE
+usage: $progname [-h] [-k] -d DIR -o OUT_FILE
 
 Do a full outer join of tab-separated methylation files.
 This resumes the file append process if for some reason
@@ -24,12 +24,13 @@ required arguments:
 
 optional arguments:
   -h              show this help message and exit
+  -k              keep intermediary files
 EOF
   exit 1
 }
 
 # Options ---------------------------------------------------------------------
-while getopts ":d:o:h" opt; do
+while getopts ":d:o:kh" opt; do
   case $opt in
     d)
       work_dir=$OPTARG
@@ -39,6 +40,9 @@ while getopts ":d:o:h" opt; do
       ;;
     h)
       usage
+      ;;
+    k)
+      keep_files=true
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -59,23 +63,16 @@ fi
 mkdir -p "$work_dir"
 
 # APPEND ----------------------------------------------------------------------
-echo "$progname: Resuming appending columns..." >&2
-
-i=1
-for f in "${work_dir}/sorted_"*; do
-  echo -n "$progname: $(printf '% 5i' $i)/unknown: $(basename "$f")" >&2
-  test -f   "$progpath/bin/do_join" && \
-            "$progpath/bin/do_join" "$f" || \
-    python3 "$progpath/python/do_join.py" "$f"
-  rm "$f"
-  echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
-  CHECKPOINT=$SECONDS
-  ((i++))
-done
+echo -n "$progname: Resuming appending columns..." >&2
+pushd "$progpath" > /dev/null
+python3 -m src "${work_dir}/sorted_"*
+popd > /dev/null
+echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
 
 # DONE ------------------------------------------------------------------------
 
 mv "${work_dir}/out.csv" "$out_file"
 
+test -z "$keep_files" && rm "${work_dir}/keys.csv" "${work_dir}/sorted_"*
+
 echo "$progname: Success! All files joined. ($SECONDS seconds since resume)" >&2
-echo "$progname: Combined comma-separated file saved in '$out_file'" >&2

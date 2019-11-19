@@ -25,10 +25,13 @@ check_keys <- sort(sample(seq(2, n_keys), n_checks))
 subset_chunk <- function(x, pos) {
   x[seq(from = pos, along.with = x) %in% check_keys]
 }
-check_lines <- read_lines_chunked(
-  out_file,
-  callback = ListCallback$new(subset_chunk),
-  chunk_size = 1e5)
+capture.output({
+  check_lines <- read_lines_chunked(
+    out_file,
+    callback = ListCallback$new(subset_chunk),
+    progress = FALSE,
+    chunk_size = 1e5)
+  }, file = '/dev/null')
 
 check_data <- read.csv(
   header = FALSE,
@@ -99,3 +102,9 @@ cat(sprintf(
 -----------------------------------------------------------------------------
 ", out_file, n_checks, ifelse(isTRUE(check), "OK", "FAIL"))
 )
+
+if ( !isTRUE(check) ) {
+  print(check)
+}
+
+save(check_keys, check_data, ref, file = "qc.rda")
