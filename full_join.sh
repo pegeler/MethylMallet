@@ -8,15 +8,19 @@ set -e
 # Standardize sort order
 export LC_ALL="en_US.UTF-8"
 
+# Speed over compression ratio
+export GZIP_OPT=-1
+
 # Usage -----------------------------------------------------------------------
 function usage {
   cat << EOF >&2
-usage: $progname [-h] [-k] -d DIR -S BUFFER_SIZE -o OUT_FILE FILE [FILE ...]
+usage:
+$progname [-h] [-k] -n NMERGE -d DIR -S BUFFER_SIZE -o OUT_FILE FILE [FILE ...]
 
 Do a full outer join of tab-separated methylation files.
 
 positional arguments:
-  FILE            file(s) to be joined
+  FILE            files to be joined
 
 required arguments:
   -d DIR          working directory (doesn't need to exist but should be empty)
@@ -25,13 +29,14 @@ required arguments:
 optional arguments:
   -h              show this help message and exit
   -k              keep intermediary files
+  -n NMERGE       number of files to merge simultaneously
   -S BUFFER_SIZE  buffer size allocated to sorting operation
 EOF
   exit 1
 }
 
 # Options ---------------------------------------------------------------------
-while getopts ":d:S:o:kh" opt; do
+while getopts ":d:S:o:n:kh" opt; do
   case $opt in
     d)
       work_dir=$OPTARG
@@ -47,6 +52,9 @@ while getopts ":d:S:o:kh" opt; do
       ;;
     k)
       keep_files=true
+      ;;
+    n)
+      batch_size="--batch-size=$OPTARG"
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -116,8 +124,10 @@ sort -t, \
   -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -k 5,5 -m \
   -S $buffer_size \
   -T "$work_dir" \
+  $batch_size \
+  --compress-program=gzip \
   "${work_dir}/sorted_"* | \
-  gzip --fast > "${work_dir}/long.csv.gz"
+  gzip > "${work_dir}/long.csv.gz"
 
 test -z "$keep_files" && rm "${work_dir}/sorted_"*
 
