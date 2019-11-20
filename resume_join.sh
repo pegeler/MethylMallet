@@ -75,6 +75,6 @@ echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
 
 mv "${work_dir}/out.csv" "$out_file"
 
-test -z "$keep_files" && rm "${work_dir}/long.csv"
+test -z "$keep_files" && rm "${work_dir}/long.csv.gz"
 
 echo "$progname: Success! All files joined. ($SECONDS seconds since resume)" >&2

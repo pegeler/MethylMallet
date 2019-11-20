@@ -3,6 +3,7 @@
 import sys
 import os
 import re
+import gzip
 
 # Process file names
 work_dir = sys.argv[1]
@@ -13,8 +14,8 @@ regex = re.compile(r'^(GSM[0-9]+)')
 tags = [regex.match(f).group(1) for f in files]
 
 # Open file handles
-fout = open(os.path.join(work_dir, 'out.csv'), 'w')
-fin = open(os.path.join(work_dir, 'long.csv'), 'r')
+fout = open(os.path.join(work_dir, 'out.csv'), 'wt')
+fin = gzip.open(os.path.join(work_dir, 'long.csv.gz'), 'rt')
 
 # Header
 fout.write('chrom,pos,strand,mc_class,' + ','.join(tags) + '\n')

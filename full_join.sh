@@ -112,14 +112,12 @@ done
 # LONG FILE -------------------------------------------------------------------
 echo -n "$progname: Combining the data into a long file..." >&2
 
-# Header
-# chrom,pos,strand,mc_class,methylation_call,tag
 sort -t, \
   -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -k 5,5 -m \
   -S $buffer_size \
   -T "$work_dir" \
-  -o "${work_dir}/long.csv" \
-  "${work_dir}/sorted_"*
+  "${work_dir}/sorted_"* | \
+  gzip --fast > "${work_dir}/long.csv.gz"
 
 test -z "$keep_files" && rm "${work_dir}/sorted_"*
 
@@ -137,6 +135,6 @@ echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
 
 mv "${work_dir}/out.csv" "$out_file"
 
-test -z "$keep_files" && rm "${work_dir}/long.csv"
+test -z "$keep_files" && rm "${work_dir}/long.csv.gz"
 
 echo "$progname: Success! All files joined. ($SECONDS seconds total)" >&2
