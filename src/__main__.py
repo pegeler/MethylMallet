@@ -29,22 +29,16 @@ values = {line[-2]: line[-1]}
 for line in fin:
     line = line.strip().split(',')
 
-    if line[:4] == key:
-        values.update({line[-2]: line[-1]})
-    else:
-        # Write out data line
+    if line[:4] != key:
+        # Write out data line for previous key
         data_line = ','.join(key) + ','
         data_line += ','.join([values.get(v, '') for v in tags]) + '\n'
+        values.clear()
         fout.write(data_line)
-
-        # Make new key
         key = line[:4]
 
-        # Reset values
-        values.clear()
-
-        # Add current line
-        values.update({line[-2]: line[-1]})
+    # Add current line
+    values.update({line[-2]: line[-1]})
 
 # Write last line
 data_line = ','.join(key) + ','
