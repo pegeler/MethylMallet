@@ -96,7 +96,12 @@ for f in "$@"; do
   # Pipe it through the sort
   zcat "$f" | \
     tail -q -n $start_line | \
-    sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -S $buffer_size -T "$work_dir" -o "${work_dir}/sorted_${file_stem}"
+    awk -v FILE_STEM="$file_stem" -f "$progpath/awk/append_tag.awk" | \
+    sort -t, \
+      -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -k 6,6 \
+      -S $buffer_size \
+      -T "$work_dir" \
+      -o "${work_dir}/sorted_${file_stem}"
 
   # Time stats
   echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
@@ -104,23 +109,23 @@ for f in "$@"; do
   ((i++))
 done
 
-# KEY FILE --------------------------------------------------------------------
-echo -n "$progname: Making the key file..." >&2
+# LONG FILE -------------------------------------------------------------------
+echo -n "$progname: Combining the data into a long file..." >&2
 
-# Put down the header
-echo "chrom,pos,strand,mc_class" > "${work_dir}/keys.csv"
-
-# Find the keys and write to csv
-sort -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -u -m -S $buffer_size -T "$work_dir" "${work_dir}/sorted_"* | \
-  cut -f 1,2,3,4 | \
-  tr '\t' , \
-  >> "${work_dir}/keys.csv"
+# Header
+# chrom,pos,strand,mc_class,methylation_call,tag
+sort -t, \
+  -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -k 6,6-m \
+  -S $buffer_size \
+  -T "$work_dir" \
+  -o "${work_dir}/long.csv" \
+  "${work_dir}/sorted_"*
 
 echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
 CHECKPOINT=$SECONDS
 
-# APPEND ----------------------------------------------------------------------
-echo -n "$progname: Appending columns..." >&2
+# SPREAD ----------------------------------------------------------------------
+echo -n "$progname: Spreading data..." >&2
 pushd "$progpath" > /dev/null
 python3 -m src "${work_dir}/sorted_"*
 popd > /dev/null
