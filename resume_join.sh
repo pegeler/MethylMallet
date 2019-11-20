@@ -55,6 +55,8 @@ while getopts ":d:o:kh" opt; do
   esac
 done
 
+shift $((OPTIND-1))
+
 if [[ -z "$work_dir" || -z "$out_file" ]]; then
   echo "ERROR: Missing option(s)"
   usage
@@ -65,7 +67,7 @@ mkdir -p "$work_dir"
 # APPEND ----------------------------------------------------------------------
 echo -n "$progname: Resuming appending columns..." >&2
 pushd "$progpath" > /dev/null
-python3 -m src "${work_dir}/sorted_"*
+python3 -m src "$work_dir" "$@"
 popd > /dev/null
 echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
 
@@ -73,6 +75,6 @@ echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
 
 mv "${work_dir}/out.csv" "$out_file"
 
-test -z "$keep_files" && rm "${work_dir}/keys.csv" "${work_dir}/sorted_"*
+test -z "$keep_files" && rm "${work_dir}/long.csv"
 
 echo "$progname: Success! All files joined. ($SECONDS seconds since resume)" >&2

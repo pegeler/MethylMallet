@@ -5,6 +5,6 @@ BEGIN {
 }
 {
 
-  print $1, $2, $3, $4, $7, FILE_TAG
+  print $1, $2, $3, $4, FILE_TAG, $7
 
 }

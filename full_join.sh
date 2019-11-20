@@ -98,7 +98,7 @@ for f in "$@"; do
     tail -q -n $start_line | \
     awk -v FILE_STEM="$file_stem" -f "$progpath/awk/append_tag.awk" | \
     sort -t, \
-      -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -k 6,6 \
+      -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -k 5,5 \
       -S $buffer_size \
       -T "$work_dir" \
       -o "${work_dir}/sorted_${file_stem}"
@@ -115,11 +115,13 @@ echo -n "$progname: Combining the data into a long file..." >&2
 # Header
 # chrom,pos,strand,mc_class,methylation_call,tag
 sort -t, \
-  -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -k 6,6 -m \
+  -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -k 5,5 -m \
   -S $buffer_size \
   -T "$work_dir" \
   -o "${work_dir}/long.csv" \
   "${work_dir}/sorted_"*
+
+test -z "$keep_files" && rm "${work_dir}/sorted_"*
 
 echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
 CHECKPOINT=$SECONDS
@@ -127,7 +129,7 @@ CHECKPOINT=$SECONDS
 # SPREAD ----------------------------------------------------------------------
 echo -n "$progname: Spreading data..." >&2
 pushd "$progpath" > /dev/null
-python3 -m src "${work_dir}/sorted_"*
+python3 -m src "$work_dir" "$@"
 popd > /dev/null
 echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
 
@@ -135,6 +137,6 @@ echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
 
 mv "${work_dir}/out.csv" "$out_file"
 
-test -z "$keep_files" && rm "${work_dir}/keys.csv" "${work_dir}/sorted_"*
+test -z "$keep_files" && rm "${work_dir}/long.csv"
 
 echo "$progname: Success! All files joined. ($SECONDS seconds total)" >&2

@@ -3,6 +3,8 @@
 ###############################################I#
 dat/
 working/
+work/
+test/work/
 experiments/
 bin/*
 !bin/.keep
