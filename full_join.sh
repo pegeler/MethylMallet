@@ -42,7 +42,7 @@ while getopts ":d:S:o:n:kh" opt; do
       work_dir=$OPTARG
       ;;
     S)
-      buffer_size=$OPTARG
+      buffer_size="--buffer-size=$OPTARG"
       ;;
     o)
       out_file=$OPTARG
@@ -68,10 +68,6 @@ while getopts ":d:S:o:n:kh" opt; do
 done
 
 shift $((OPTIND-1))
-
-if [[ -z "$buffer_size" ]]; then
-  buffer_size=1024b
-fi
 
 if [[ -z "$work_dir" || -z "$out_file" ]]; then
   echo "ERROR: Missing option(s)"
@@ -107,7 +103,7 @@ for f in "$@"; do
     awk -v FILE_STEM="$file_stem" -f "$progpath/awk/append_tag.awk" | \
     sort -t, \
       -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -k 5,5 \
-      -S $buffer_size \
+      $buffer_size \
       -T "$work_dir" \
       -o "${work_dir}/sorted_${file_stem}"
 
@@ -120,13 +116,13 @@ done
 # LONG FILE -------------------------------------------------------------------
 echo -n "$progname: Spreading the data..." >&2
 
-sort -t, \
-  -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -k 5,5 -m \
-  -S $buffer_size \
-  -T "$work_dir" \
-  $batch_size \
-  --compress-program=gzip \
-  "${work_dir}/sorted_"* | \
+sort  -t, \
+      -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -k 5,5 -m \
+      $buffer_size \
+      -T "$work_dir" \
+      $batch_size \
+      --compress-program=gzip \
+      "${work_dir}/sorted_"* | \
   "$progpath/python/spread.py" "$@" | \
   gzip > "$out_file"
 
