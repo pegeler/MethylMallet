@@ -27,7 +27,8 @@ Full outer join of very large files using low resources.
 ## Usage
 
 ```
-usage: full_join.sh [-h] [-k] -d DIR -S BUFFER_SIZE -o OUT_FILE FILE [FILE ...]
+usage:
+full_join.sh [-h] [-k] -n NMERGE -S BUFFER_SIZE -d DIR -o OUT_FILE FILE [FILE ...]
 
 Do a full outer join of tab-separated methylation files.
 
@@ -41,6 +42,7 @@ required arguments:
 optional arguments:
   -h              show this help message and exit
   -k              keep intermediary files
+  -n NMERGE       number of files to merge simultaneously
   -S BUFFER_SIZE  buffer size allocated to sorting operation
 ```
 

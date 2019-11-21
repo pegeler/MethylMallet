@@ -15,7 +15,7 @@ export GZIP_OPT=-1
 function usage {
   cat << EOF >&2
 usage:
-$progname [-h] [-k] -n NMERGE -d DIR -S BUFFER_SIZE -o OUT_FILE FILE [FILE ...]
+$progname [-h] [-k] -n NMERGE -S BUFFER_SIZE -d DIR -o OUT_FILE FILE [FILE ...]
 
 Do a full outer join of tab-separated methylation files.
 
