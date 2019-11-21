@@ -118,7 +118,7 @@ for f in "$@"; do
 done
 
 # LONG FILE -------------------------------------------------------------------
-echo -n "$progname: Combining the data into a long file..." >&2
+echo -n "$progname: Spreading the data..." >&2
 
 sort -t, \
   -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -k 5,5 -m \
@@ -127,24 +127,14 @@ sort -t, \
   $batch_size \
   --compress-program=gzip \
   "${work_dir}/sorted_"* | \
-  gzip > "${work_dir}/long.csv.gz"
+  "$progpath/python/spread.py" "$@" | \
+  gzip > "$out_file"
 
 test -z "$keep_files" && rm "${work_dir}/sorted_"*
 
 echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
 CHECKPOINT=$SECONDS
 
-# SPREAD ----------------------------------------------------------------------
-echo -n "$progname: Spreading data..." >&2
-pushd "$progpath" > /dev/null
-python3 -m src "$work_dir" "$@"
-popd > /dev/null
-echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
-
 # DONE ------------------------------------------------------------------------
-
-mv "${work_dir}/out.csv" "$out_file"
-
-test -z "$keep_files" && rm "${work_dir}/long.csv.gz"
 
 echo "$progname: Success! All files joined. ($SECONDS seconds total)" >&2
