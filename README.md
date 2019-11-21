@@ -17,7 +17,6 @@ Full outer join of very large files using low resources.
   - bash, GNU core utils, gzip, _&c._
   - python3
 - Optional
-  - xz (compressing output file)
   - md5sum
   - R with the follwoing packages
     - doParallel
