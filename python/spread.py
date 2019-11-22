@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from sys import argv, stdout, stdin
-import os
+from os.path import basename
 import re
 
-# Process file names
-files = [os.path.basename(i) for i in argv[1:]]
+def write_line(tags, key, values):
+    data_line = ','.join(key) + ','
+    data_line += ','.join([values.get(t, '') for t in tags]) + '\n'
+    values.clear()
+    stdout.write(data_line)
 
 # Get tags
-regex = re.compile(r'^(GSM[0-9]+)')
-tags = [regex.match(f).group(1) for f in files]
+r = re.compile(r'^(GSM[0-9]+)')
+tags = [r.match(basename(f)).group(1) for f in argv[1:]]
 
 # Header
 stdout.write('chrom,pos,strand,mc_class,' + ','.join(tags) + '\n')
@@ -22,19 +25,10 @@ values = {line[-2]: line[-1]}
 # Loop over the infile
 for line in stdin:
     line = line.strip().split(',')
-
     if line[:4] != key:
-        # Write out data line for previous key
-        data_line = ','.join(key) + ','
-        data_line += ','.join([values.get(v, '') for v in tags]) + '\n'
-        values.clear()
-        stdout.write(data_line)
+        write_line(tags, key, values)
         key = line[:4]
-
-    # Add current line
     values.update({line[-2]: line[-1]})
 
 # Write last line
-data_line = ','.join(key) + ','
-data_line += ','.join([values.get(v, '') for v in tags]) + '\n'
-stdout.write(data_line)
+write_line(tags, key, values)

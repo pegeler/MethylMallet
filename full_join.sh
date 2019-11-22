@@ -85,8 +85,8 @@ echo "$progname: Sorting files one-by-one" >&2
 CHECKPOINT=$SECONDS
 i=1
 for f in "$@"; do
-  file_name=$(basename "$f")
-  file_stem=$(basename "$f" .gz)
+  file_name="$( basename "$f" )"
+  file_stem="$( basename "$f" .tsv.gz )"
   echo -n "$progname: $(printf '% 5i' $i)/$#: $file_name" >&2
 
   # Find out if the first line has headers
