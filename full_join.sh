@@ -83,11 +83,14 @@ echo "$progname: Sorting the inputs..." >&2
 
 echo "$progname: Sorting files one-by-one" >&2
 CHECKPOINT=$SECONDS
-i=1
+i=0
 for f in "$@"; do
+  # File name management
   file_name="$( basename "$f" )"
-  file_stem="$( basename "$f" .tsv.gz )"
-  echo -n "$progname: $(printf '% 5i' $i)/$#: $file_name" >&2
+  file_stem="$( basename "$f" .gz )"
+  sorted_files[$i]="$work_dir/sorted_$file_stem"
+
+  echo -n "$progname: $(printf '% 5i' $(expr $i + 1))/$#: $file_name" >&2
 
   # Find out if the first line has headers
   first_line=$(zcat "$f" | head -n 1 | cut -f 1)
@@ -105,12 +108,12 @@ for f in "$@"; do
       -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 \
       $buffer_size \
       -T "$work_dir" \
-      -o "${work_dir}/sorted_${file_stem}"
+      -o "${sorted_files[$i]}"
 
   # Time stats
   echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
   CHECKPOINT=$SECONDS
-  ((i++))
+  ((++i))
 done
 
 # LONG FILE -------------------------------------------------------------------
@@ -123,11 +126,11 @@ sort  -t, \
       -T "$work_dir" \
       $batch_size \
       --compress-program=gzip \
-      "${work_dir}/sorted_"* | \
+      "${sorted_files[@]}" | \
   "$progpath/python/spread.py" "$@" | \
   gzip > "$out_file"
 
-test -z "$keep_files" && rm "${work_dir}/sorted_"*
+test -z "$keep_files" && rm "${sorted_files[@]}"
 
 echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
 CHECKPOINT=$SECONDS
