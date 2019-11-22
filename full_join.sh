@@ -102,7 +102,7 @@ for f in "$@"; do
     tail -q -n $start_line | \
     awk -v FILE_STEM="$file_stem" -f "$progpath/awk/append_tag.awk" | \
     sort -t, \
-      -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -k 5,5 \
+      -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 \
       $buffer_size \
       -T "$work_dir" \
       -o "${work_dir}/sorted_${file_stem}"
@@ -117,7 +117,8 @@ done
 echo -n "$progname: Spreading the data..." >&2
 
 sort  -t, \
-      -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 -k 5,5 -m \
+      -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 \
+      -m \
       $buffer_size \
       -T "$work_dir" \
       $batch_size \
