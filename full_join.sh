@@ -6,7 +6,7 @@ progpath="$( dirname "$( readlink -f "$0" )" )"
 set -e
 
 # Standardize sort order
-export LC_ALL="en_US.UTF-8"
+export LC_ALL=C
 
 # Speed over compression ratio
 export GZIP_OPT=-1
@@ -15,7 +15,8 @@ export GZIP_OPT=-1
 function usage {
   cat << EOF >&2
 usage:
-$progname [-h] [-k] -n NMERGE -S BUFFER_SIZE -d DIR -o OUT_FILE FILE [FILE ...]
+$progname [-h] [-j JOBS] [-k] [-n NMERGE] [-S BUFFER_SIZE]
+          -d DIR -o OUT_FILE FILE [FILE ...]
 
 Do a full outer join of tab-separated methylation files.
 
@@ -23,11 +24,12 @@ positional arguments:
   FILE            files to be joined
 
 required arguments:
-  -d DIR          working directory (doesn't need to exist but should be empty)
+  -d DIR          working directory to store intermediary files
   -o OUT_FILE     file name to be output to
 
 optional arguments:
   -h              show this help message and exit
+  -j JOBS         number of parallel jobs using GNU parallel
   -k              keep intermediary files
   -n NMERGE       number of files to merge simultaneously
   -S BUFFER_SIZE  buffer size allocated to sorting operation
@@ -36,7 +38,7 @@ EOF
 }
 
 # Options ---------------------------------------------------------------------
-while getopts ":d:S:o:n:kh" opt; do
+while getopts ":d:S:o:n:j:kh" opt; do
   case $opt in
     d)
       work_dir=$OPTARG
@@ -52,6 +54,9 @@ while getopts ":d:S:o:n:kh" opt; do
       ;;
     k)
       keep_files=true
+      ;;
+    j)
+      n_jobs=$OPTARG
       ;;
     n)
       batch_size="--batch-size=$OPTARG"
@@ -80,41 +85,44 @@ mkdir -p "$work_dir"
 echo "$progname: Sorting the inputs..." >&2
 
 # Sort all of our input data files
-
-echo "$progname: Sorting files one-by-one" >&2
 CHECKPOINT=$SECONDS
-i=0
-for f in "$@"; do
-  # File name management
-  file_name="$( basename "$f" )"
-  file_stem="$( basename "$f" .gz )"
-  sorted_files[$i]="$work_dir/sorted_$file_stem"
+if [[ -n "$n_jobs" && -x "$(command -v parallel)" ]]; then
+  echo "$progname: Sorting files in parallel" >&2
 
-  echo -n "$progname: $(printf '% 5i' $(expr $i + 1))/$#: $file_name" >&2
+  i=0
+  for f in "$@"; do
+    sorted_files[$i]="$work_dir/sorted_$( basename "$f" .gz )"
+    ((++i))
+  done
 
-  # Find out if the first line has headers
-  first_line=$(zcat "$f" | head -n 1 | cut -f 1)
-  if [[ "$first_line" == "chrom" ]]; then
-    start_line=+2
-  else
-    start_line=+1
-  fi
+  parallel -j $n_jobs \
+    'zcat "{1}" | awk -v FILE_STEM="{1/.}" -f "{2}/awk/append_tag.awk" | \
+     sort -t, -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 {3} -T "{4}" -o "{4}/sorted_{1/.}"' \
+    ::: "$@" ::: "$progpath" ::: $buffer_size ::: "$work_dir"
 
-  # Pipe it through the sort
-  zcat "$f" | \
-    tail -q -n $start_line | \
-    awk -v FILE_STEM="$file_stem" -f "$progpath/awk/append_tag.awk" | \
-    sort -t, \
-      -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 \
-      $buffer_size \
-      -T "$work_dir" \
-      -o "${sorted_files[$i]}"
+    echo "Intial sorting done in $((SECONDS - CHECKPOINT)) seconds." >&2
+    CHECKPOINT=$SECONDS
+else
+  echo "$progname: Sorting files one-by-one" >&2
+  i=0
+  for f in "$@"; do
+    file_name="$( basename "$f" )"
+    file_stem="$( basename "$f" .gz )"
+    sorted_files[$i]="$work_dir/sorted_$file_stem"
+    echo -n "$progname: $(printf '% 5i' $(expr $i + 1))/$#: $file_name" >&2
+    zcat "$f" | \
+      awk -v FILE_STEM="$file_stem" -f "$progpath/awk/append_tag.awk" | \
+      sort -t, \
+        -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 \
+        $buffer_size \
+        -T "$work_dir" \
+        -o "${sorted_files[$i]}"
 
-  # Time stats
-  echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
-  CHECKPOINT=$SECONDS
-  ((++i))
-done
+    echo " ($((SECONDS - CHECKPOINT)) seconds)" >&2
+    CHECKPOINT=$SECONDS
+    ((++i))
+  done
+fi
 
 # LONG FILE -------------------------------------------------------------------
 echo -n "$progname: Spreading the data..." >&2
