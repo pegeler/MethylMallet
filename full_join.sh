@@ -100,7 +100,7 @@ if [[ -n "$n_jobs" && -x "$(command -v parallel)" ]]; then
      sort -t, -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 {3} -T "{4}" -o "{4}/sorted_{1/.}"' \
     ::: "$@" ::: "$progpath" ::: $buffer_size ::: "$work_dir"
 
-    echo "Intial sorting done in $((SECONDS - CHECKPOINT)) seconds." >&2
+    echo "$progname: Intial sorting done in $((SECONDS - CHECKPOINT)) seconds." >&2
     CHECKPOINT=$SECONDS
 else
   echo "$progname: Sorting files one-by-one" >&2
