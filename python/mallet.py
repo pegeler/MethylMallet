@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from bitstring import BitArray
+from bitarray import bitarray
 from os.path import basename
 import re
 import gzip
@@ -11,7 +11,7 @@ class Mallet():
         self.files = files
         self.n_columns = len(files)
         self.keys = self._get_keys()
-        self.data = BitArray(len(self.keys) * self.n_columns * 2)
+        self.data = len(self.keys) * self.n_columns * 2 * bitarray('0')
         self.current_column = 0
         for file in files:
             fin = gzip.open(file, 'rt')
@@ -49,31 +49,24 @@ class Mallet():
         key, value = self._parse_line(line.strip())
         row = self.keys.get(key)
         location = row * self.n_columns*2 + self.current_column*2
-        self.data.set(True, location)
-        if value == '1':
-            self.data.set(True, location + 1)
-
-    def _bits_to_char(self, bits, sep):
-        out = ''
-        for i in range(0, len(bits), 2):
-            out += sep
-            if bits[i] == '1':
-                out += bits[i + 1]
-        return out
+        length = 2 if value == '1' else 1
+        self.data[location:(location + length)] = True
 
     def write_file(self, path):
         sep = '\t'  # Only supporting tabs for now
-        header = ['chrom', 'pos', 'strand', 'mc_class'] + self.tags
-
+        d = {'': bitarray('00'), '0': bitarray('10'), '1': bitarray('11')}
+        
         fout = gzip.open(path, 'wt')
+        
+        header = ['chrom', 'pos', 'strand', 'mc_class'] + self.tags
         fout.write(sep.join(header) + '\n')
 
         for k in self.keys:
             row = self.keys.get(k)
             start = row*self.n_columns*2
             stop = (row + 1)*self.n_columns*2
-            fout.write(k)
-            fout.write(self._bits_to_char(self.data[start:stop].bin, sep))
+            fout.write(k + sep)
+            fout.write(sep.join(self.data[start:stop].iterdecode(d)))
             fout.write('\n')
 
 
