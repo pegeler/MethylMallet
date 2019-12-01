@@ -10,7 +10,8 @@ class Mallet():
     def __init__(self, files):
         self.files = files
         self.n_columns = len(files)
-        self.data = {}
+        self.keys = self._get_keys()
+        self.data = BitArray(len(self.keys) * self.n_columns * 2)
         self.current_column = 0
         for file in files:
             fin = gzip.open(file, 'rt')
@@ -24,6 +25,17 @@ class Mallet():
         r = re.compile(r'^(GSM[0-9]+)')
         self.tags = [r.match(basename(f)).group(1) for f in files]
 
+    def _get_keys(self):
+        key_set = set()
+        for file in self.files:
+            fin = gzip.open(file, 'rt')
+            first_line = fin.readline()
+            if first_line[:5] != 'chrom':
+                key_set.add(self._parse_line(first_line)[0])
+            for line in fin:
+                key_set.add(self._parse_line(line)[0])
+        return {k: v for v, k in enumerate(key_set)}
+
     def _parse_line(self, string, n_fields=4, sep='\t'):
         n_sep = 0
         for i in range(len(string)):
@@ -33,16 +45,13 @@ class Mallet():
                 return string[:i], string[-1]
         raise Exception
 
-    def _insert_value(self, bits, value):
-        bits.set(True, self.current_column*2)
-        if value == '1':
-            bits.set(True, self.current_column*2 + 1)
-        return bits
-
     def _update(self, line):
         key, value = self._parse_line(line.strip())
-        bits = self.data.get(key, BitArray(self.n_columns * 2))
-        self.data.update({key: self._insert_value(bits, value)})
+        row = self.keys.get(key)
+        location = row * self.n_columns*2 + self.current_column*2
+        self.data.set(True, location)
+        if value == '1':
+            self.data.set(True, location + 1)
 
     def _bits_to_char(self, bits, sep):
         out = ''
@@ -59,8 +68,13 @@ class Mallet():
         fout = gzip.open(path, 'wt')
         fout.write(sep.join(header) + '\n')
 
-        for k, v in self.data.items():
-            fout.write(k + self._bits_to_char(v.bin, sep) + '\n')
+        for k in self.keys:
+            row = self.keys.get(k)
+            start = row*self.n_columns*2
+            stop = (row + 1)*self.n_columns*2
+            fout.write(k)
+            fout.write(self._bits_to_char(self.data[start:stop].bin, sep))
+            fout.write('\n')
 
 
 if __name__ == "__main__":
