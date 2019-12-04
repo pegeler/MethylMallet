@@ -38,8 +38,7 @@ class Mallet():
         for f in self.files:
             lines = gzip.open(f, 'rt').readlines()
             first_line = 1 if lines[0][:5] == 'chrom' else 0
-            key_set = key_set.union(
-                {self._parse_line(i)[0] for i in lines[first_line:]})
+            key_set |= {self._parse_line(i)[0] for i in lines[first_line:]}
         return {k: v for v, k in enumerate(key_set)}
 
     def _read_data(self):
