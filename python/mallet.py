@@ -13,28 +13,9 @@ class Mallet():
         self.keys = self._get_keys()
         self.data = len(self.keys) * self.n_columns * 2 * bitarray('0')
         self.current_column = 0
-        for file in files:
-            fin = gzip.open(file, 'rt')
-            first_line = fin.readline()
-            if first_line[:5] != 'chrom':
-                self._update(first_line)
-            for line in fin:
-                self._update(line)
-            self.current_column += 1
-
+        self._read_data()
         r = re.compile(r'^(GSM[0-9]+)')
         self.tags = [r.match(basename(f)).group(1) for f in files]
-
-    def _get_keys(self):
-        key_set = set()
-        for file in self.files:
-            fin = gzip.open(file, 'rt')
-            first_line = fin.readline()
-            if first_line[:5] != 'chrom':
-                key_set.add(self._parse_line(first_line)[0])
-            for line in fin:
-                key_set.add(self._parse_line(line)[0])
-        return {k: v for v, k in enumerate(key_set)}
 
     def _parse_line(self, string, n_fields=4, sep='\t'):
         n_sep = 0
@@ -51,6 +32,25 @@ class Mallet():
         location = row * self.n_columns*2 + self.current_column*2
         length = 2 if value == '1' else 1
         self.data[location:(location + length)] = True
+
+    def _get_keys(self):
+        key_set = set()
+        for f in self.files:
+            lines = gzip.open(f, 'rt').readlines()
+            first_line = 1 if lines[0][:5] == 'chrom' else 0
+            key_set = key_set.union(
+                {self._parse_line(i)[0] for i in lines[first_line:]})
+        return {k: v for v, k in enumerate(key_set)}
+
+    def _read_data(self):
+        for f in self.files:
+            fin = gzip.open(f, 'rt')
+            first_line = fin.readline()
+            if first_line[:5] != 'chrom':
+                self._update(first_line)
+            for line in fin:
+                self._update(line)
+            self.current_column += 1
 
     def write_file(self, path):
         sep = '\t'  # Only supporting tabs for now
