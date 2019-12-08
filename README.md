@@ -14,10 +14,14 @@ Full outer join of very large files using low resources.
 ## System Requirements
 
 - Required
-  - bash, GNU core utils, gzip, _&c._
+  - bash
+  - GNU core utils
+  - gzip
+  - awk
   - python3
 - Optional
-  - md5sum
+  - GNU parallel
+- Testing and Quality Control
   - R with the follwoing packages
     - doParallel
     - dplyr
