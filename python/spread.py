@@ -29,6 +29,6 @@ for line in stdin:
         write_line(tags, key, values)
         key = line[:4]
     values.update({line[-2]: line[-1]})
-
-# Write last line
-write_line(tags, key, values)
+else:
+    # Write last line
+    write_line(tags, key, values)
