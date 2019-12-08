@@ -19,8 +19,8 @@ class Mallet():
 
     def _parse_line(self, string, n_fields=4, sep='\t'):
         n_sep = 0
-        for i in range(len(string)):
-            if string[i] == sep:
+        for i, c in enumerate(string):
+            if c == sep:
                 n_sep += 1
             if n_sep == n_fields:
                 return string[:i], string[-1]
