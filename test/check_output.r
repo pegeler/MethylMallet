@@ -31,7 +31,7 @@ ref <-
 
 # Checking against processed data -----------------------------------------
 
-check <- read.delim('out/new.tsv.gz', stringsAsFactors = FALSE)
+check <- read.csv('out/test.csv.gz', stringsAsFactors = FALSE)
 check %<>%
   select(
     c("chrom", "pos", "strand", "mc_class",

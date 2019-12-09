@@ -4,15 +4,19 @@ from sys import argv, stdout, stdin
 from os.path import basename
 import re
 
+
 def write_line(tags, key, values):
     data_line = ','.join(key) + ','
-    data_line += ','.join([values.get(t, '') for t in tags]) + '\n'
-    values.clear()
+    data_line += ','.join(values.get(t) for t in tags) + '\n'
     stdout.write(data_line)
+    for k in values:
+        values[k] = ''
+
 
 # Get tags
 r = re.compile(r'^(GSM[0-9]+)')
 tags = [r.match(basename(f)).group(1) for f in argv[1:]]
+values = {}.fromkeys(tags, '')
 
 # Header
 stdout.write('chrom,pos,strand,mc_class,' + ','.join(tags) + '\n')
@@ -20,7 +24,7 @@ stdout.write('chrom,pos,strand,mc_class,' + ','.join(tags) + '\n')
 # Initialize values for loop
 line = stdin.readline().strip().split(',')
 key = line[:4]
-values = {line[-2]: line[-1]}
+values.update({line[-2]: line[-1]})
 
 # Loop over the infile
 for line in stdin:
