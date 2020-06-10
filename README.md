@@ -6,6 +6,7 @@ Full outer join of very large files using low resources.
 ## Table of Contents
 
 * [System Requirements](#system-requirements)
+* [Installation](#installation)
 * [Usage](#usage)
 * [Quality Control](#quality-control)
 * [Test Data](#test-data)
@@ -17,15 +18,34 @@ Full outer join of very large files using low resources.
   - bash
   - GNU core utils
   - gzip
-  - awk
-  - python3
+  - gcc 
 - Optional
   - GNU parallel
+  - make
 - Testing and Quality Control
+  - python3
   - R with the follwoing packages
     - doParallel
     - dplyr
     - readr
+
+## Installation
+
+Prior to running this script, you must compile the C source code.
+If you have `make` and `gcc` installed on your computer, compiling
+is as easy as the following line.
+
+```bash
+make
+```
+
+### Development Environment
+
+If you are running this script on GNU-Linux, these programs are likely already
+installed. If you do not have a development environment, you will need to
+install one. MacOS users can install [Xcode](https://developer.apple.com/xcode/)
+while I recommend [RTools](https://cran.r-project.org/bin/windows/Rtools/) for
+Windows users.
 
 ## Usage
 

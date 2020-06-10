@@ -5,6 +5,16 @@ progpath="$( dirname "$( readlink -f "$0" )" )"
 
 set -e
 
+# Quick check to see if binaries are made
+if [[ ! -x "$progpath/bin/append_tag" || ! -x "$progpath/bin/spread" ]]; then
+  cat << EOF >&2
+ERROR: $progname cannot run because compiled binaries have not been made.
+ERROR: Try using the 'make' command to create those binaries.
+ERROR: Consult the README.md for details.
+EOF
+  exit 1
+fi
+
 # Standardize sort order
 export LC_ALL=C
 
