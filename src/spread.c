@@ -29,7 +29,7 @@ char *get_tag(char *path)
   t = basename(path);
   if ((u = strchr(t, '_')) != NULL)
     *u = '\0';
-  char *out = (char *) malloc(strlen(t) * sizeof(*t) + 1);
+  char *out = (char *) malloc((strlen(t) + 1) * sizeof(*t));
   for (int i=0; (out[i] = t[i]) != '\0'; i++)
     ;
   return out;
@@ -111,10 +111,8 @@ int main(int argc, char *argv[])
   char **tags = (char **) malloc(--argc * sizeof(char *));
   char record[N_FIELDS][MAX_FIELD], keys[KEY_FIELDS][MAX_FIELD];
 
-  for (int i=0; i < argc; i++) {
+  for (int i=0; i < argc; i++)
     tags[i] = get_tag(argv[i+1]);
-    h_ins(tags[i], "");
-  }
 
   write_header(tags, argc);
 
