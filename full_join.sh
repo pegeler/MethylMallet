@@ -106,8 +106,7 @@ if [[ -n "$n_jobs" && -x "$(command -v parallel)" ]]; then
   done
 
   parallel -j $n_jobs \
-    'zcat "{1}" | "{2}/bin/append_tag" "{1/.}" | tr "\t" "," |
-     sort -t, -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 {3} -T "{4}" -o "{4}/sorted_{1/.}"' \
+    'zcat "{1}" | "{2}/bin/append_tag" "{1/.}" | tr "\t" "," | sort -t, -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 {3} -T "{4}" -o "{4}/sorted_{1/.}"' \
     ::: "$@" ::: "$progpath" ::: $buffer_size ::: "$work_dir"
 
     echo "$progname: Intial sorting done in $((SECONDS - CHECKPOINT)) seconds." >&2
