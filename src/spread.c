@@ -88,23 +88,19 @@ int compare_keys(char record[][MAX_FIELD], char keys[][MAX_FIELD])
 
 void write_line(char **tags, char keys[][MAX_FIELD], int len)
 {
-  Node *t;
+  char val[MAX_LINE];
+
   for (int i=0; i < KEY_FIELDS; i++) {
-    if (i > 0) // Cleaner? printf(i == 0 ? "%s" : ",%s", keys[i]);
+    if (i > 0)
       putchar(FIELD_SEP);
     fputs(keys[i], stdout);
   }
 
   for (int i=0; i < len; i++) {
     putchar(FIELD_SEP);
-    t = h_get(tags[i]);
-    if (t == NULL) {
-      fprintf(stderr, "tag not found\n");
-      exit(1);
-    }
-    if (t->val[0] > '\0')
-      fputs(t->val, stdout);
-    t->val = "";
+    h_pop(tags[i], val);
+    if (val[0] > '\0')
+      fputs(val, stdout);
   }
   putchar('\n');
 }
@@ -133,7 +129,7 @@ int main(int argc, char *argv[])
 
   while (fgets(line, MAX_LINE, stdin) != NULL) {
     process_record(line, record);
-    if (compare_keys(record, keys)) {
+    if (!compare_keys(record, keys)) {
       write_line(tags, keys, argc);
       assign_keys(record, keys);
     }

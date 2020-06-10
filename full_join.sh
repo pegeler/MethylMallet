@@ -96,7 +96,7 @@ if [[ -n "$n_jobs" && -x "$(command -v parallel)" ]]; then
   done
 
   parallel -j $n_jobs \
-    'zcat "{1}" | "{2}/bin/append_tag" "{1/.}" | tr "\t" "," | \
+    'zcat "{1}" | "{2}/bin/append_tag" "{1/.}" | tr "\t" "," |
      sort -t, -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 {3} -T "{4}" -o "{4}/sorted_{1/.}"' \
     ::: "$@" ::: "$progpath" ::: $buffer_size ::: "$work_dir"
 
@@ -112,7 +112,7 @@ else
     echo -n "$progname: $(printf '% 5i' $(expr $i + 1))/$#: $file_name" >&2
     zcat "$f" | \
       "$progpath/bin/append_tag" "$file_stem" | \
-      tr "\t" "," \
+      tr "\t" "," | \
       sort -t, \
         -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 \
         $buffer_size \

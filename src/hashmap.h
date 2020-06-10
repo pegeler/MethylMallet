@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 typedef struct node {
   char *key;
@@ -12,5 +13,6 @@ typedef struct node {
 
 Node *h_get(char *key);
 void h_ins(char *key, char *val);
+int h_pop(char *key, char *dest);
 
 #endif
