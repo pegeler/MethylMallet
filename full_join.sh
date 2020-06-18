@@ -3,7 +3,7 @@
 progname="$( basename "$0" )"
 progpath="$( dirname "$( readlink -f "$0" )" )"
 
-set -e
+set -e -o pipefail
 
 # Quick check to see if binaries are made
 if [[ ! -x "$progpath/bin/append_tag" || ! -x "$progpath/bin/spread" ]]; then
