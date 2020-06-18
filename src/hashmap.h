@@ -11,6 +11,7 @@ typedef struct node {
   struct node *next;
 } Node;
 
+int h_init(int size);
 Node *h_get(char *key);
 void h_ins(char *key, char *val);
 int h_pop(char *key, char *dest);

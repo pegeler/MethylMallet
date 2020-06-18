@@ -110,6 +110,7 @@ int main(int argc, char *argv[])
   char line[MAX_LINE];
   char **tags = (char **) malloc(--argc * sizeof(char *));
   char record[N_FIELDS][MAX_FIELD], keys[KEY_FIELDS][MAX_FIELD];
+  h_ins(argc);
 
   for (int i=0; i < argc; i++)
     tags[i] = get_tag(argv[i+1]);
