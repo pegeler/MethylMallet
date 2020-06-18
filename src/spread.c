@@ -95,6 +95,11 @@ int main(int argc, char *argv[])
   char **tags = (char **) malloc(--argc * sizeof(char *));
   char record[N_FIELDS][MAX_FIELD], keys[KEY_FIELDS][MAX_FIELD];
 
+  if (!h_init(argc)) {
+    fprintf(stderr, "%s: error initializing hashmap\n", argv[0]);
+    exit(1);
+  }
+
   for (int i=0; i < argc; i++)
     tags[i] = get_tag(argv[i+1]);
 

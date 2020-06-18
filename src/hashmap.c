@@ -1,16 +1,29 @@
 #include "hashmap.h"
 
-#define BUCKETS 1999
-#define MAX_LEN  100
+#define MAX_LEN 100
 
-static Node *h[BUCKETS];
+static Node **h;
+static unsigned int buckets;
 
 static unsigned int hash(char *key)
 {
   unsigned int hashval=0L;
   while (*key != '\0')
     hashval = hashval * 31 + *key++;
-  return (unsigned int) hashval % BUCKETS;
+  return (unsigned int) hashval % buckets;
+}
+
+int h_init(unsigned int size)
+{
+  size = size * 1.33f;
+  if (size < 17)
+    buckets = 17;
+  else
+    buckets = is_prime(size) ? size : next_prime(size);
+
+  h = malloc(buckets * sizeof(Node *));
+
+  return h == NULL ? 0 : 1;
 }
 
 Node *h_get(char *key)
@@ -54,5 +67,4 @@ void h_ins(char *key, char *val)
   }
 }
 
-#undef BUCKETS
 #undef MAX_LEN
