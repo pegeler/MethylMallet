@@ -1,7 +1,5 @@
 #include "hashmap.h"
 
-#define MAX_LEN 100
-
 static Node **h;
 static unsigned int buckets;
 
@@ -40,10 +38,10 @@ int h_pop(char *key, char *dest)
 
   if (p != NULL) {
     strcpy(dest, p->val);
-    memset(p->val, '\0', sizeof(p->val));
+    p->val[0] = '\0';
     return 1;
   } else {
-    memset(dest, '\0', sizeof(dest));
+    dest[0] = '\0';
     return 0;
   }
 }
@@ -55,8 +53,8 @@ void h_ins(char *key, char *val)
 
   if (p == NULL) {
     p = (Node *) malloc(sizeof(*p));
-    p->key = (char *) malloc(sizeof(char) * MAX_LEN);
-    p->val = (char *) malloc(sizeof(char) * MAX_LEN);
+    p->key = (char *) malloc(sizeof(char) * MAX_FIELD);
+    p->val = (char *) malloc(sizeof(char) * MAX_FIELD);
     strcpy(p->key, key);
     strcpy(p->val, val);
     hashval = hash(key);
@@ -66,5 +64,3 @@ void h_ins(char *key, char *val)
     strcpy(p->val, val);
   }
 }
-
-#undef MAX_LEN

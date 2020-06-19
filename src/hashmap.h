@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "primes.h"
+#include "config.h"
 
 typedef struct node {
   char *key;

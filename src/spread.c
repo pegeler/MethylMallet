@@ -2,13 +2,9 @@
 #include <libgen.h>
 #include <string.h>
 #include "hashmap.h"
+#include "config.h"
 
-#define MAX_LINE  1000
-#define MAX_FIELD  100
-#define KEY_FIELDS   4
-#define N_FIELDS     6
-#define FIELD_SEP  ','
-#define trace(s) puts((s))
+#define FIELD_SEP ','
 
 char *get_tag(char *path)
 {
@@ -83,7 +79,7 @@ void write_line(char **tags, char keys[][MAX_FIELD], int len)
   for (int i=0; i < len; i++) {
     putchar(FIELD_SEP);
     h_pop(tags[i], val);
-    if (strlen(val))
+    if (val > '\0')
       fputs(val, stdout);
   }
   putchar('\n');
