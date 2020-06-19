@@ -79,7 +79,7 @@ void write_line(char **tags, char keys[][MAX_FIELD], int len)
   for (int i=0; i < len; i++) {
     putchar(FIELD_SEP);
     h_pop(tags[i], val);
-    if (val > '\0')
+    if (val[0] > '\0')
       fputs(val, stdout);
   }
   putchar('\n');
