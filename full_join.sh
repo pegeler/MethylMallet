@@ -3,7 +3,17 @@
 progname="$( basename "$0" )"
 progpath="$( dirname "$( readlink -f "$0" )" )"
 
-set -e
+set -e -o pipefail
+
+# Quick check to see if binaries are made
+if [[ ! -x "$progpath/bin/append_tag" || ! -x "$progpath/bin/spread" ]]; then
+  cat << EOF >&2
+ERROR: $progname cannot run because compiled binaries have not been made.
+ERROR: Try using the 'make' command to create those binaries.
+ERROR: Consult the README.md for details.
+EOF
+  exit 1
+fi
 
 # Standardize sort order
 export LC_ALL=C
@@ -96,8 +106,7 @@ if [[ -n "$n_jobs" && -x "$(command -v parallel)" ]]; then
   done
 
   parallel -j $n_jobs \
-    'zcat "{1}" | awk -v FILE_STEM="{1/.}" -f "{2}/awk/append_tag.awk" | \
-     sort -t, -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 {3} -T "{4}" -o "{4}/sorted_{1/.}"' \
+    'zcat "{1}" | "{2}/bin/append_tag" "{1/.}" | tr "\t" "," | sort -t, -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 {3} -T "{4}" -o "{4}/sorted_{1/.}"' \
     ::: "$@" ::: "$progpath" ::: $buffer_size ::: "$work_dir"
 
     echo "$progname: Intial sorting done in $((SECONDS - CHECKPOINT)) seconds." >&2
@@ -111,7 +120,8 @@ else
     sorted_files[$i]="$work_dir/sorted_$file_stem"
     echo -n "$progname: $(printf '% 5i' $(expr $i + 1))/$#: $file_name" >&2
     zcat "$f" | \
-      awk -v FILE_STEM="$file_stem" -f "$progpath/awk/append_tag.awk" | \
+      "$progpath/bin/append_tag" "$file_stem" | \
+      tr "\t" "," | \
       sort -t, \
         -k 1n,1 -k 2n,2 -k 3,3 -k 4,4 \
         $buffer_size \
@@ -135,7 +145,7 @@ sort  -t, \
       $batch_size \
       --compress-program=gzip \
       "${sorted_files[@]}" | \
-  "$progpath/python/spread.py" "$@" | \
+  "$progpath/bin/spread" "$@" | \
   gzip > "$out_file"
 
 test -z "$keep_files" && rm "${sorted_files[@]}"
