@@ -1,18 +1,17 @@
 #include <stdio.h>
 #include <string.h>
+#include "config.h"
 
-#define MAX_LINE 1000
-#define MAX_TAG  1000
 #define FIELD_SEP '\t'
 
 void process_line(char *l, char *t)
 {
-  for (int field=1; field <= 4; l++) {
+  for (int field=0; field < KEY_FIELDS; l++) {
     if (*l == FIELD_SEP)
       field++;
     putchar(*l);
   }
-  
+
   fputs(t, stdout);
 
   for (l = strrchr(l, FIELD_SEP); *l != '\0'; l++)
@@ -21,7 +20,7 @@ void process_line(char *l, char *t)
 
 int main(int argc, char *argv[])
 {
-  char line[MAX_LINE], tag[MAX_TAG];
+  char line[MAX_LINE], tag[MAX_FIELD];
   int i;
 
   // Get the tag

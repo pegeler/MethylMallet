@@ -2,26 +2,9 @@
 #include <libgen.h>
 #include <string.h>
 #include "hashmap.h"
+#include "config.h"
 
-#define TRUE         1
-#define FALSE        0
-#define MAX_LINE  1000
-#define MAX_FIELD  100
-#define KEY_FIELDS   4
-#define N_FIELDS     6
-#define FIELD_SEP  ','
-#define trace(s) puts((s))
-
-/* // Using a 2d char array instead
-typedef struct {
-  char chrom[MAX_FIELD];
-  char pos[MAX_FIELD];
-  char strand[MAX_FIELD];
-  char mc_class[MAX_FIELD];
-  char tag[MAX_FIELD];
-  char state[MAX_FIELD];
-} Record;
-*/
+#define FIELD_SEP ','
 
 char *get_tag(char *path)
 {
@@ -29,10 +12,7 @@ char *get_tag(char *path)
   t = basename(path);
   if ((u = strchr(t, '_')) != NULL)
     *u = '\0';
-  char *out = (char *) malloc((strlen(t) + 1) * sizeof(*t));
-  for (int i=0; (out[i] = t[i]) != '\0'; i++)
-    ;
-  return out;
+  return strdup(t);
 }
 
 void write_header(char **tags, int n)
@@ -82,8 +62,8 @@ int compare_keys(char record[][MAX_FIELD], char keys[][MAX_FIELD])
 {
   for (int i=0; i < KEY_FIELDS; i++)
     if (strcmp(record[i], keys[i]) != 0)
-      return FALSE;
-  return TRUE;
+      return 0;
+  return 1;
 }
 
 void write_line(char **tags, char keys[][MAX_FIELD], int len)
@@ -110,6 +90,11 @@ int main(int argc, char *argv[])
   char line[MAX_LINE];
   char **tags = (char **) malloc(--argc * sizeof(char *));
   char record[N_FIELDS][MAX_FIELD], keys[KEY_FIELDS][MAX_FIELD];
+
+  if (!h_init(argc)) {
+    fprintf(stderr, "%s: error initializing hashmap\n", argv[0]);
+    exit(1);
+  }
 
   for (int i=0; i < argc; i++)
     tags[i] = get_tag(argv[i+1]);

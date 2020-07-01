@@ -1,15 +1,27 @@
 #include "hashmap.h"
 
-#define BUCKETS 1999
-
-static Node *h[BUCKETS];
+static Node **h;
+static unsigned int buckets;
 
 static unsigned int hash(char *key)
 {
   unsigned int hashval=0L;
   while (*key != '\0')
     hashval = hashval * 31 + *key++;
-  return (unsigned int) hashval % BUCKETS;
+  return (unsigned int) hashval % buckets;
+}
+
+int h_init(unsigned int size)
+{
+  size = size * 1.33f;
+  if (size < 17)
+    buckets = 17;
+  else
+    buckets = is_prime(size) ? size : next_prime(size);
+
+  h = malloc(buckets * sizeof(Node *));
+
+  return h == NULL ? 0 : 1;
 }
 
 Node *h_get(char *key)
@@ -22,30 +34,16 @@ Node *h_get(char *key)
 
 int h_pop(char *key, char *dest)
 {
-  unsigned int hashval = hash(key);
-  Node *prev = NULL;
+  Node *p = h_get(key);
 
-  for (Node *curr = h[hashval]; curr != NULL; curr = curr->next) {
-    if (strcmp(curr->key, key) == 0) {
-      // Resetting linked list
-      if (prev == NULL)
-        h[hashval] = curr->next;
-      else
-        prev->next = curr->next;
-
-      // Copying data, free memory, and return
-      strcpy(dest, curr->val);
-      free(curr->key);
-      free(curr->val);
-      free(curr);
-      return 1;
-    }
-    prev = curr;
+  if (p != NULL) {
+    strcpy(dest, p->val);
+    p->val[0] = '\0';
+    return 1;
+  } else {
+    dest[0] = '\0';
+    return 0;
   }
-
-  // Key not found. Copying null string.
-  dest[0] = '\0';
-  return 0;
 }
 
 void h_ins(char *key, char *val)
@@ -55,13 +53,14 @@ void h_ins(char *key, char *val)
 
   if (p == NULL) {
     p = (Node *) malloc(sizeof(*p));
+    p->key = (char *) malloc(sizeof(char) * MAX_FIELD);
+    p->val = (char *) malloc(sizeof(char) * MAX_FIELD);
+    strcpy(p->key, key);
+    strcpy(p->val, val);
     hashval = hash(key);
-    p->key = strdup(key);
-    p->val = strdup(val);
     p->next = h[hashval];
     h[hashval] = p;
   } else {
-    free(p->val);
-    p->val = strdup(val);
+    strcpy(p->val, val);
   }
 }
