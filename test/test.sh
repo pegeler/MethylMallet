@@ -8,7 +8,7 @@ mkdir -p out
 
 echo "Testing parallel..." >&2
 
-../full_join.sh -d work -j 2 -n 5 -S10M -o out/test.csv.gz data/GSM*
+../methyl_mallet -d work -j 2 -n 5 -S10M -o out/test.csv.gz data/GSM*
 
 CHECKSUM=$(zcat out/test.csv.gz | md5sum | cut -d" " -f1)
 
@@ -20,7 +20,7 @@ fi
 
 echo "Testing single..." >&2
 
-../full_join.sh -d work -n 5 -S10M -o out/test.csv.gz data/GSM*
+../methyl_mallet -d work -n 5 -S10M -o out/test.csv.gz data/GSM*
 
 CHECKSUM=$(zcat out/test.csv.gz | md5sum | cut -d" " -f1)
 

@@ -1,7 +1,7 @@
 MethylMallet <img src='assets/mm_logo.png' align='right' height='120px' />
 ==========================================================================
 
-Full outer join of very large files using low resources.
+Full outer join of very large gene methylation data files using low resources.
 
 ## Table of Contents
 
@@ -51,7 +51,7 @@ Windows users.
 
 ```
 usage:
-full_join.sh [-h] [-k] -n NMERGE -S BUFFER_SIZE -d DIR -o OUT_FILE FILE [FILE ...]
+methyl_mallet [-h] [-k] -n NMERGE -S BUFFER_SIZE -d DIR -o OUT_FILE FILE [FILE ...]
 
 Do a full outer join of tab-separated methylation files.
 
